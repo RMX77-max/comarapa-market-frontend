@@ -6,6 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 
 /*
  * If not building with SSR mode, you can
@@ -16,7 +17,7 @@ import routes from './routes';
  * with the Router instance.
  */
 
-export default defineRouter(function (/* { store, ssrContext } */) {
+export default defineRouter(function ({ store }) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
@@ -31,6 +32,23 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach((to) => {
+    const estaAutenticado = useTiendaAutenticacion(store).estaAutenticado;
+
+    if (to.meta.requiereAutenticacion && !estaAutenticado) {
+      return {
+        name: 'iniciar-sesion',
+        query: { redireccion: to.fullPath },
+      };
+    }
+
+    if (to.meta.soloInvitados && estaAutenticado) {
+      return { name: 'inicio' };
+    }
+
+    return true;
   });
 
   return Router;

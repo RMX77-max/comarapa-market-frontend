@@ -1,1 +1,190 @@
-// app global css in SCSS form
+:root {
+  --verde-principal: #086b3c;
+  --verde-secundario: #3c8a61;
+  --verde-claro: #edf6f0;
+  --fondo: #ffffff;
+  --fondo-secundario: #f6f5eb;
+  --arena: #e8c597;
+  --oliva-claro: #dbe7c1;
+  --texto-principal: #10251b;
+  --texto-secundario: #707873;
+  --borde: #e3e8e5;
+  --peligro: #b83a3a;
+  --sombra-suave: 0 8px 24px rgb(20 50 34 / 9%);
+  --radio-pequeno: 10px;
+  --radio-medio: 16px;
+  --radio-grande: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#q-app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--texto-principal);
+  background: var(--fondo-secundario);
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--verde-principal);
+  text-decoration: none;
+}
+
+.contenedor-pagina {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 28px clamp(16px, 3vw, 32px) 112px;
+}
+
+.contenedor-formulario {
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+
+.titulo-pagina {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.texto-secundario {
+  color: var(--texto-secundario);
+}
+
+.tarjeta-suave {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-medio);
+  background: var(--fondo);
+  box-shadow: var(--sombra-suave);
+}
+
+.cuadricula-productos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.encabezado-seccion {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 28px 0 14px;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 700;
+  }
+}
+
+.boton-principal {
+  min-height: 48px;
+  border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.boton-secundario {
+  min-height: 48px;
+  border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.campo-formulario .q-field__control {
+  min-height: 52px;
+  border-radius: 14px;
+  background: var(--fondo);
+  box-shadow: 0 6px 18px rgb(61 70 48 / 7%);
+}
+
+.campo-formulario.q-field--outlined .q-field__control::before {
+  border-color: var(--borde);
+}
+
+.pagina-autenticacion {
+  display: grid;
+  min-height: 100vh;
+  padding: 28px 16px;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(234 244 238 / 90%), transparent 42%),
+    var(--fondo-secundario);
+}
+
+.tarjeta-autenticacion {
+  width: min(100%, 430px);
+  padding: clamp(24px, 6vw, 38px);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+  background: var(--fondo);
+  box-shadow: var(--sombra-suave);
+}
+
+.encabezado-autenticacion {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.titulo-autenticacion {
+  margin: 26px 0 6px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.subtitulo-autenticacion {
+  margin: 0;
+  color: var(--texto-secundario);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 359px) {
+  .contenedor-pagina {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .pagina-autenticacion {
+    padding: 0;
+    background: var(--fondo);
+  }
+
+  .tarjeta-autenticacion {
+    padding: 24px 16px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media (min-width: 720px) {
+  .cuadricula-productos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contenedor-pagina {
+    padding-bottom: 56px;
+  }
+  .cuadricula-productos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
