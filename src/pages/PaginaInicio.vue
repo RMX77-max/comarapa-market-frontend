@@ -557,7 +557,40 @@ onMounted(() => void cargar());
 
 
   .categorias-inicio {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(62px, 1fr));
+    gap: 7px;
+    margin-inline: -4px;
+    padding: 14px 4px 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    button {
+      flex-direction: column;
+      gap: 6px;
+      min-width: 62px;
+      padding: 7px 3px 8px;
+      border-radius: 14px;
+      font-size: 0.68rem;
+      line-height: 1.15;
+      text-align: center;
+      box-shadow: 0 5px 16px rgb(0 70 40 / 8%);
+      scroll-snap-align: start;
+    }
+
+    span {
+      width: 50px;
+      height: 50px;
+
+      img {
+        width: 43px;
+        height: 43px;
+      }
+    }
   }
 
   .servicios-inicio__rejilla {
