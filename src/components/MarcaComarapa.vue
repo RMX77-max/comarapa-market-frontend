@@ -8,7 +8,7 @@
     >
       <img
         class="marca-comarapa__logo marca-comarapa__logo--encabezado"
-        src="/logos/comarapa-market-horizontal.png"
+        src="/Comarapa_Market_Logo_Pin_Quasar_Apps/Comarapa_Market_Logo_Pin_Quasar/07_quasar_public_icons/logo-header.png"
         alt="Comarapa Market"
         decoding="async"
       />
