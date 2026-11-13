@@ -48,10 +48,27 @@ withDefaults(
   background: transparent;
 
   &__enlace {
+    position: relative;
     display: block;
+    isolation: isolate;
     line-height: 0;
     color: inherit;
     text-decoration: none;
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      top: 50%;
+      left: 0;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgb(255 255 255 / 72%);
+      border-radius: 13px;
+      background: #fffaf0;
+      box-shadow: 0 5px 14px rgb(0 35 20 / 22%);
+      content: '';
+      transform: translateY(-50%);
+    }
   }
 
   &__logo {
@@ -106,6 +123,12 @@ withDefaults(
     &__logo--encabezado {
       width: 190px;
       height: 48px;
+    }
+
+    &__enlace::before {
+      width: 43px;
+      height: 43px;
+      border-radius: 11px;
     }
 
     &--centrada {
