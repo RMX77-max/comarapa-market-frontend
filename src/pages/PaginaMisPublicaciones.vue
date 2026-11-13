@@ -1,9 +1,5 @@
 <template>
   <q-page class="contenedor-pagina">
-    <div class="encabezado-publicaciones">
-      <h1 class="titulo-pagina">Mis publicaciones</h1>
-    </div>
-
     <estado-contenido v-if="tienda.cargando" tipo="cargando" />
     <estado-contenido
       v-else-if="tienda.error"
@@ -31,44 +27,27 @@
         <template #acciones>
           <div class="acciones-publicacion" @click.stop>
             <q-btn
-              v-if="producto.estado === 'activo'"
-              flat
-              round
-              icon="edit_square"
+              v-if="producto.estado === 'activo' && producto.estado_moderacion !== 'oculta'"
+              class="accion-publicacion accion-publicacion--editar"
+              unelevated
+              no-caps
+              dense
+              icon="edit_note"
+              label="Editar"
               color="primary"
               aria-label="Editar"
               :to="{ name: 'editar-publicacion', params: { id: producto.id } }"
-              ><q-tooltip>Editar publicación</q-tooltip></q-btn
-            >
+            />
             <q-btn
-              v-if="producto.estado === 'activo'"
-              flat
-              round
-              icon="sell"
-              color="primary"
-              aria-label="Marcar vendido"
-              @click="marcarVendido(producto.id)"
-              ><q-tooltip>Marcar como vendido</q-tooltip></q-btn
-            >
-            <q-btn
-              v-else-if="producto.estado === 'vendido'"
-              flat
-              round
-              icon="published_with_changes"
-              color="orange-9"
-              aria-label="Volver a publicar"
-              @click="marcarDisponible(producto.id)"
-              ><q-tooltip>Volver a marcar como disponible</q-tooltip></q-btn
-            >
-            <q-btn
-              flat
-              round
-              icon="delete_forever"
-              color="negative"
+              class="accion-publicacion accion-publicacion--eliminar"
+              unelevated
+              no-caps
+              dense
+              icon="delete_outline"
+              label="Eliminar"
               aria-label="Eliminar"
               @click="eliminar(producto.id)"
-              ><q-tooltip>Eliminar publicación</q-tooltip></q-btn
-            >
+            />
           </div>
         </template>
       </tarjeta-producto>
@@ -82,11 +61,7 @@ import { useRouter } from 'vue-router';
 import EstadoContenido from 'components/EstadoContenido.vue';
 import TarjetaProducto from 'components/TarjetaProducto.vue';
 import type { Producto } from 'src/models/Producto';
-import {
-  eliminarProducto,
-  marcarComoDisponible,
-  marcarComoVendido,
-} from 'src/services/servicioProductos';
+import { eliminarProducto } from 'src/services/servicioProductos';
 import { obtenerMensajeError } from 'src/services/servicioApi';
 import { useTiendaProductos } from 'src/stores/tiendaProductos';
 import { useQuasar } from 'quasar';
@@ -100,32 +75,18 @@ async function recargar(): Promise<void> {
   await tienda.cargarMisPublicaciones();
 }
 function abrirProducto(producto: Producto): void {
-  if (producto.estado !== 'activo') {
+  if (producto.estado !== 'activo' || producto.estado_moderacion !== 'aprobada') {
     q.notify({
-      message: 'Reactiva el producto para verlo y editarlo nuevamente.',
+      message:
+        producto.estado_moderacion === 'pendiente'
+          ? 'La publicación todavía está siendo revisada.'
+          : producto.motivo_moderacion || 'Esta publicación todavía no está visible públicamente.',
       icon: 'info',
       color: 'primary',
     });
     return;
   }
   void enrutador.push({ name: 'detalle-producto', params: { id: producto.id } });
-}
-async function marcarVendido(id: number): Promise<void> {
-  try {
-    await marcarComoVendido(id);
-    await recargar();
-  } catch (error) {
-    q.notify({ type: 'negative', message: obtenerMensajeError(error) });
-  }
-}
-async function marcarDisponible(id: number): Promise<void> {
-  try {
-    await marcarComoDisponible(id);
-    q.notify({ type: 'positive', message: 'El producto vuelve a estar disponible.' });
-    await recargar();
-  } catch (error) {
-    q.notify({ type: 'negative', message: obtenerMensajeError(error) });
-  }
 }
 async function eliminar(id: number): Promise<void> {
   if (!window.confirm('¿Quieres eliminar esta publicación?')) return;
@@ -140,35 +101,40 @@ onMounted(() => void recargar());
 </script>
 
 <style scoped lang="scss">
-.encabezado-publicaciones {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  justify-content: space-between;
-}
-.encabezado-publicaciones .titulo-pagina {
-  font-size: clamp(1.45rem, 5vw, 2.15rem);
-  white-space: nowrap;
-}
 .acciones-publicacion {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
   margin-top: 8px;
   border-top: 1px solid var(--borde);
-  padding-top: 10px;
+  padding-top: 8px;
+}
 
-  .q-btn {
-    width: 42px;
-    height: 42px;
-    background: var(--verde-claro);
-    font-size: 1.2rem;
+.accion-publicacion {
+  min-width: 0;
+  min-height: 32px;
+  padding: 2px 6px;
+  border-radius: 9px;
+  font-size: clamp(.66rem, 2.7vw, .76rem);
+  font-weight: 700;
+
+  :deep(.q-btn__content) {
+    flex-wrap: nowrap;
+    gap: 3px;
   }
-  .q-btn.text-negative {
-    background: #fff0ee;
+
+  :deep(.q-icon) {
+    font-size: 17px;
   }
-  .q-btn.text-orange-9 {
-    background: #fff3df;
+
+  &--editar {
+    color: var(--azul-marino) !important;
+    background: var(--azul-suave) !important;
+  }
+
+  &--eliminar {
+    color: var(--peligro) !important;
+    background: rgb(184 58 58 / 12%) !important;
   }
 }
 </style>

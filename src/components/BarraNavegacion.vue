@@ -1,5 +1,5 @@
 <template>
-  <q-footer v-if="!ocultarNavegacion" class="barra-inferior">
+  <q-footer v-if="!ocultarNavegacion && !tecladoVisible" class="barra-inferior">
     <nav class="barra-inferior__contenido" aria-label="Navegación principal">
       <q-btn
         v-for="opcion in opciones"
@@ -21,11 +21,45 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const ruta = useRoute();
 const ocultarNavegacion = computed(() => Boolean(ruta.meta.ocultarNavegacion));
+const tecladoVisible = ref(false);
+
+function esCampoDeTexto(elemento: EventTarget | null): boolean {
+  if (!(elemento instanceof HTMLElement)) return false;
+  if (elemento instanceof HTMLTextAreaElement || elemento.isContentEditable) return true;
+  if (!(elemento instanceof HTMLInputElement)) return false;
+  return ![
+    'button',
+    'checkbox',
+    'color',
+    'file',
+    'hidden',
+    'radio',
+    'range',
+    'reset',
+    'submit',
+  ].includes(elemento.type);
+}
+function alEnfocar(evento: FocusEvent): void {
+  if (window.innerWidth < 900 && esCampoDeTexto(evento.target)) tecladoVisible.value = true;
+}
+function alDesenfocar(): void {
+  window.setTimeout(() => {
+    tecladoVisible.value = window.innerWidth < 900 && esCampoDeTexto(document.activeElement);
+  }, 100);
+}
+onMounted(() => {
+  document.addEventListener('focusin', alEnfocar);
+  document.addEventListener('focusout', alDesenfocar);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener('focusin', alEnfocar);
+  document.removeEventListener('focusout', alDesenfocar);
+});
 
 const opciones = [
   { nombre: 'inicio', etiqueta: 'Inicio', icono: 'home' },
@@ -39,7 +73,7 @@ const opciones = [
 <style scoped lang="scss">
 .barra-inferior {
   border-top: 1px solid var(--borde);
-  background: rgb(255 255 255 / 97%);
+  background: var(--fondo);
   color: var(--texto-secundario);
   backdrop-filter: blur(12px);
 
@@ -47,7 +81,7 @@ const opciones = [
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     width: min(100%, 680px);
-    min-height: 68px;
+    min-height: 72px;
     margin: 0 auto;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -56,24 +90,40 @@ const opciones = [
     min-width: 0;
     border-radius: 0;
     color: var(--texto-secundario);
-    font-size: 0.7rem;
+    font-size: var(--tamano-navegacion);
 
     &--activa {
-      color: var(--verde-principal);
+      color: var(--coral);
     }
 
     &--vender {
-      color: var(--verde-principal);
+      color: var(--coral);
 
       :deep(.q-icon) {
         padding: 9px;
         border-radius: 50%;
-        background: var(--verde-principal);
+        background: var(--primario-oscuro);
         color: white;
         font-size: 29px;
+        box-shadow: 0 7px 18px rgb(0 70 40 / 28%);
         transform: translateY(-7px);
       }
     }
+  }
+}
+
+:global(.body--dark) .barra-inferior {
+  border-top-color: var(--borde);
+  background: #10241b;
+  color: #b3c2b8;
+
+  .barra-inferior__opcion {
+    color: #b3c2b8;
+  }
+
+  .barra-inferior__opcion--activa,
+  .barra-inferior__opcion--vender {
+    color: var(--coral);
   }
 }
 

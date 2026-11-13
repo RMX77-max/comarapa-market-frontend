@@ -1,9 +1,12 @@
 <template>
   <q-page class="contenedor-pagina">
-    <h1 class="titulo-pagina">Buscar</h1>
-    <div class="filtros-busqueda q-mt-lg">
-      <campo-busqueda v-model="busqueda" />
-      <selector-categoria v-model="categoriaId" :opciones="categorias" />
+    <div class="filtros-busqueda">
+      <campo-busqueda
+        v-model="busqueda"
+        :categoria-id="categoriaId"
+        :opciones-categoria="categorias"
+        @update:categoria-id="categoriaId = $event"
+      />
     </div>
 
     <div class="encabezado-seccion">
@@ -42,7 +45,6 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import CampoBusqueda from 'components/CampoBusqueda.vue';
 import EstadoContenido from 'components/EstadoContenido.vue';
-import SelectorCategoria from 'components/SelectorCategoria.vue';
 import TarjetaProducto from 'components/TarjetaProducto.vue';
 import type { Producto } from 'src/models/Producto';
 import { useTiendaProductos } from 'src/stores/tiendaProductos';
@@ -82,13 +84,6 @@ function abrirProducto(producto: Producto): void {
 
 <style scoped lang="scss">
 .filtros-busqueda {
-  display: grid;
-  gap: 12px;
-}
-
-@media (min-width: 640px) {
-  .filtros-busqueda {
-    grid-template-columns: 1fr 280px;
-  }
+  width: 100%;
 }
 </style>

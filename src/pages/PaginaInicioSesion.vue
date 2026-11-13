@@ -67,7 +67,6 @@
           unelevated
           :loading="cargando"
         />
-
         <q-btn
           class="boton-secundario full-width"
           color="primary"
@@ -78,10 +77,6 @@
         />
       </q-form>
 
-      <p class="texto-simulacion">
-        Prototipo visual: puedes ingresar con cualquier correo válido y una contraseña de 8
-        caracteres.
-      </p>
     </main>
   </q-page>
 </template>

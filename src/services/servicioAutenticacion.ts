@@ -1,5 +1,6 @@
 import type { RespuestaApi } from 'src/models/Api';
 import type { Usuario } from 'src/models/Usuario';
+export { solicitarRecuperacion, restablecerContrasena } from './servicioOperaciones';
 import { servicioApi } from './servicioApi';
 
 interface DatosSesion {

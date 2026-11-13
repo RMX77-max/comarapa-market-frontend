@@ -13,6 +13,7 @@ export const categoriasSimuladas: Categoria[] = [
 ];
 
 export const usuarioSimulado: Usuario = {
+  rol: 'usuario',
   id: 1,
   nombre: 'Débora B.',
   email: 'debora@ejemplo.com',
@@ -30,6 +31,8 @@ export const productosSimulados: Producto[] = [
     ubicacion: 'Comarapa',
     url_imagen: null,
     estado: 'activo',
+    estado_moderacion: 'aprobada',
+    motivo_moderacion: null,
     categoria: categoriasSimuladas[0]!,
     vendedor: {
       id: 2,
@@ -47,6 +50,8 @@ export const productosSimulados: Producto[] = [
     ubicacion: 'Comarapa',
     url_imagen: null,
     estado: 'activo',
+    estado_moderacion: 'aprobada',
+    motivo_moderacion: null,
     categoria: categoriasSimuladas[1]!,
     vendedor: usuarioSimulado,
     fecha_publicacion: '2026-09-18T10:15:00.000Z',
@@ -59,6 +64,8 @@ export const productosSimulados: Producto[] = [
     ubicacion: 'Comarapa',
     url_imagen: null,
     estado: 'activo',
+    estado_moderacion: 'aprobada',
+    motivo_moderacion: null,
     categoria: categoriasSimuladas[2]!,
     vendedor: usuarioSimulado,
     fecha_publicacion: '2026-09-17T09:00:00.000Z',
@@ -71,6 +78,8 @@ export const productosSimulados: Producto[] = [
     ubicacion: 'Saipina',
     url_imagen: null,
     estado: 'activo',
+    estado_moderacion: 'aprobada',
+    motivo_moderacion: null,
     categoria: categoriasSimuladas[3]!,
     vendedor: usuarioSimulado,
     fecha_publicacion: '2026-09-16T18:45:00.000Z',
@@ -100,6 +109,9 @@ export const conversacionesSimuladas: Conversacion[] = [
       titulo: productosSimulados[0]!.titulo,
       url_imagen: productosSimulados[0]!.url_imagen,
       estado: productosSimulados[0]!.estado,
+      precio: productosSimulados[0]!.precio,
+      descripcion: productosSimulados[0]!.descripcion,
+      ubicacion: productosSimulados[0]!.ubicacion,
     },
     otra_persona: {
       id: 2,
@@ -108,5 +120,9 @@ export const conversacionesSimuladas: Conversacion[] = [
     },
     ultimo_mensaje: mensajesSimulados[1]!,
     fecha_ultima_actividad: mensajesSimulados[1]!.fecha_envio,
+    estado: 'en_atencion',
+    tipo: 'consulta_producto',
+    puede_responder: true,
+    operacion: null,
   },
 ];

@@ -22,19 +22,25 @@ import type { DatosFormularioProducto } from 'src/models/FormularioProducto';
 import { crearProducto } from 'src/services/servicioProductos';
 import { obtenerMensajeError } from 'src/services/servicioApi';
 import { useTiendaProductos } from 'src/stores/tiendaProductos';
+import { useQuasar } from 'quasar';
 
 const enrutador = useRouter();
 const tienda = useTiendaProductos();
 const categorias = computed(() => tienda.categorias);
 const guardando = ref(false);
 const error = ref('');
+const q = useQuasar();
 
 async function crearPublicacion(datos: DatosFormularioProducto): Promise<void> {
   guardando.value = true;
   error.value = '';
   try {
-    const producto = await crearProducto(datos);
-    await enrutador.replace({ name: 'detalle-producto', params: { id: producto.id } });
+    await crearProducto(datos);
+    q.notify({
+      type: 'positive',
+      message: 'Publicación enviada. La revisaremos antes de mostrarla en el marketplace.',
+    });
+    await enrutador.replace({ name: 'mis-publicaciones' });
   } catch (causa) {
     error.value = obtenerMensajeError(causa);
   } finally {

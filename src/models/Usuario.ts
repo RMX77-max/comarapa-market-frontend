@@ -5,6 +5,8 @@ export interface Usuario {
   ubicacion: string;
   url_foto_perfil: string | null;
   fecha_registro?: string;
+  rol: 'usuario' | 'administrador' | 'superadministrador';
+  estado_cuenta?: 'activo' | 'suspendido' | 'bloqueado';
 }
 
 export interface ResumenUsuario {

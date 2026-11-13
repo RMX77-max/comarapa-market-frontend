@@ -64,6 +64,8 @@ export function crearProductoSimulado(datos: DatosFormularioProducto, usuario: U
     ubicacion: datos.ubicacion,
     url_imagen: datos.url_imagen ?? null,
     estado: 'activo',
+    estado_moderacion: 'aprobada',
+    motivo_moderacion: null,
     categoria,
     vendedor: {
       id: usuario.id,

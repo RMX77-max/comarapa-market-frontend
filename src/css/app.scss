@@ -1,20 +1,47 @@
 :root {
-  --verde-principal: #086b3c;
-  --verde-secundario: #3c8a61;
-  --verde-claro: #edf6f0;
+  --primario-oscuro: #004628;
+  --primario: #409951;
+  --primario-claro: #9bdf9d;
+  --superficie-suave: #edf3eb;
+  --azul-marino: var(--texto-principal);
+  --coral: var(--primario);
+  --coral-oscuro: #2f7f43;
+  --coral-suave: #dcefdc;
+  --azul-suave: var(--superficie-suave);
+  --fondo-azulado: #fefaef;
+  /* Alias de compatibilidad mientras las vistas antiguas migran al nuevo sistema. */
+  --verde-principal: var(--primario-oscuro);
+  --verde-secundario: var(--primario);
+  --verde-claro: var(--superficie-suave);
   --fondo: #ffffff;
-  --fondo-secundario: #f6f5eb;
-  --arena: #e8c597;
-  --oliva-claro: #dbe7c1;
-  --texto-principal: #10251b;
-  --texto-secundario: #707873;
-  --borde: #e3e8e5;
+  --fondo-secundario: var(--fondo-azulado);
+  --arena: var(--coral-suave);
+  --oliva-claro: var(--azul-suave);
+  --texto-principal: #172b4d;
+  --texto-secundario: #64746b;
+  --borde: #dfe5e1;
   --peligro: #b83a3a;
-  --sombra-suave: 0 8px 24px rgb(20 50 34 / 9%);
-  --radio-pequeno: 10px;
-  --radio-medio: 16px;
-  --radio-grande: 24px;
+  --sombra-suave: 0 10px 30px rgb(0 70 40 / 9%);
+  --radio-pequeno: 12px;
+  --radio-medio: 18px;
+  --radio-grande: 26px;
+  --fuente-titulos: 'Poppins', sans-serif;
+  --fuente-texto: 'Inter', sans-serif;
+  --tamano-hero: clamp(2.125rem, 5vw, 3.5rem);
+  --tamano-seccion: clamp(1.5rem, 3vw, 2.25rem);
+  --tamano-tarjeta: clamp(1.125rem, 2vw, 1.375rem);
+  --tamano-precio: clamp(1.125rem, 2vw, 1.25rem);
+  --tamano-base: clamp(1rem, 1.5vw, 1.125rem);
+  --tamano-meta: clamp(0.8125rem, 1vw, 0.875rem);
+  --tamano-navegacion: clamp(0.875rem, 1vw, 1rem);
+  --tamano-boton: clamp(1rem, 1.4vw, 1.125rem);
 }
+
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
 
 *,
 *::before,
@@ -32,12 +59,132 @@ body {
   margin: 0;
   color: var(--texto-principal);
   background: var(--fondo-secundario);
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--fuente-texto);
+  font-size: var(--tamano-base);
   -webkit-font-smoothing: antialiased;
 }
 
+.body--dark {
+  --primario-oscuro: #9bdf9d;
+  --primario: #72c47b;
+  --primario-claro: #9bdf9d;
+  --superficie-suave: #183b2a;
+  --azul-marino: var(--texto-principal);
+  --coral: var(--primario);
+  --coral-oscuro: #9bdf9d;
+  --coral-suave: #183b2a;
+  --azul-suave: #183b2a;
+  --fondo-azulado: #0b1812;
+  --fondo: #10241b;
+  --fondo-secundario: #0b1812;
+  --texto-principal: #f4f7f4;
+  --texto-secundario: #b3c2b8;
+  --borde: #2c4b3a;
+  --verde-principal: var(--primario-claro);
+  --verde-secundario: var(--primario);
+  --verde-claro: var(--superficie-suave);
+  --sombra-suave: 0 12px 34px rgb(0 0 0 / 30%);
+  color: var(--texto-principal);
+  background: var(--fondo-secundario);
+}
+
+/* El inicio tiene una composición decorativa propia para el tema claro.
+   En oscuro debe compartir la superficie sólida del resto de las vistas. */
+body.body--dark .pagina-inicio {
+  background: #0b1812 !important;
+}
+
+body.body--dark .encabezado-principal {
+  background: #004628 !important;
+}
+
+body.body--dark .pagina-inicio .accion-hero {
+  border-color: var(--borde);
+  background: var(--fondo) !important;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
+}
+
+body.body--dark .pagina-inicio .accion-hero__icono {
+  background: #183b2a;
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas {
+  border-color: var(--borde);
+  background: var(--fondo) !important;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 30%);
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas .q-btn {
+  color: #f3f6fb;
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas .q-btn:nth-child(1) {
+  background: #194b30;
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas .q-btn:nth-child(2) {
+  background: #245c39;
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas .q-btn:nth-child(3) {
+  background: #2f7045;
+}
+
+body.body--dark .pagina-inicio .acciones-movil-fijas .q-icon {
+  color: #9bdf9d;
+}
+
+.body--dark .q-card,
+.body--dark .q-list,
+.body--dark .q-tab-panel,
+.body--dark .q-drawer,
+.body--dark .q-menu {
+  color: var(--texto-principal);
+  background: var(--fondo);
+}
+
+.body--dark .q-field__control,
+.body--dark .q-field__native,
+.body--dark .q-field__input,
+.body--dark .q-field__label {
+  color: var(--texto-principal);
+}
+
+.body--dark .campo-formulario .q-field__control {
+  border: 1px solid #365c45;
+  background: #142f22;
+  box-shadow: 0 7px 20px rgb(0 0 0 / 18%);
+}
+
+.body--dark .campo-formulario.q-field--outlined .q-field__control::before,
+.body--dark .campo-formulario.q-field--outlined .q-field__control::after {
+  border-color: transparent;
+}
+
+.body--dark .campo-formulario.q-field--focused .q-field__control {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgb(155 223 157 / 14%);
+}
+
+.body--dark .campo-formulario input,
+.body--dark .campo-formulario textarea {
+  color: var(--texto-principal) !important;
+  background: transparent !important;
+  caret-color: var(--coral);
+}
+
+/* Chrome y Safari aplican un fondo claro propio al completar credenciales. */
+.body--dark .campo-formulario input:-webkit-autofill,
+.body--dark .campo-formulario input:-webkit-autofill:hover,
+.body--dark .campo-formulario input:-webkit-autofill:focus,
+.body--dark .campo-formulario input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--texto-principal) !important;
+  box-shadow: 0 0 0 1000px #142f22 inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
 a {
-  color: var(--verde-principal);
+  color: var(--azul-marino);
   text-decoration: none;
 }
 
@@ -54,7 +201,9 @@ a {
 
 .titulo-pagina {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--azul-marino);
+  font-family: var(--fuente-titulos);
+  font-size: var(--tamano-hero);
   font-weight: 700;
   line-height: 1.2;
 }
@@ -85,7 +234,9 @@ a {
 
   h2 {
     margin: 0;
-    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    color: var(--azul-marino);
+    font-family: var(--fuente-titulos);
+    font-size: var(--tamano-seccion);
     font-weight: 700;
   }
 }
@@ -93,6 +244,8 @@ a {
 .boton-principal {
   min-height: 48px;
   border-radius: 14px;
+  font-family: var(--fuente-titulos);
+  font-size: var(--tamano-boton);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -101,6 +254,8 @@ a {
 .boton-secundario {
   min-height: 48px;
   border-radius: 14px;
+  font-family: var(--fuente-titulos);
+  font-size: var(--tamano-boton);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -110,7 +265,7 @@ a {
   min-height: 52px;
   border-radius: 14px;
   background: var(--fondo);
-  box-shadow: 0 6px 18px rgb(61 70 48 / 7%);
+  box-shadow: 0 6px 18px rgb(0 70 40 / 7%);
 }
 
 .campo-formulario.q-field--outlined .q-field__control::before {
@@ -123,17 +278,23 @@ a {
   padding: 28px 16px;
   place-items: center;
   background:
-    radial-gradient(circle at 50% 0%, rgb(234 244 238 / 90%), transparent 42%),
-    var(--fondo-secundario);
+    radial-gradient(circle at 50% 0%, rgb(155 223 157 / 48%), transparent 44%),
+    #fefaef;
 }
 
 .tarjeta-autenticacion {
-  width: min(100%, 430px);
+  width: 100%;
+  max-width: 430px;
+  min-width: 0;
   padding: clamp(24px, 6vw, 38px);
-  border: 1px solid var(--borde);
+  border: 1px solid #c9e3cb;
   border-radius: var(--radio-grande);
-  background: var(--fondo);
-  box-shadow: var(--sombra-suave);
+  background: #eaf5e8;
+  box-shadow: 0 18px 46px rgb(0 70 40 / 13%);
+}
+
+.tarjeta-autenticacion > * {
+  min-width: 0;
 }
 
 .encabezado-autenticacion {
@@ -142,16 +303,68 @@ a {
 }
 
 .titulo-autenticacion {
-  margin: 26px 0 6px;
-  font-size: 1.75rem;
-  font-weight: 600;
+  margin: 20px 0 6px;
+  color: #004628;
+  font-family: var(--fuente-titulos);
+  font-size: var(--tamano-seccion);
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .subtitulo-autenticacion {
   margin: 0;
-  color: var(--texto-secundario);
-  font-size: 0.95rem;
+  color: #50685a;
+  font-size: 1rem;
+}
+
+.tarjeta-autenticacion .campo-formulario .q-field__control {
+  background: #fff;
+}
+
+.body--dark .pagina-autenticacion {
+  background: #0b1812;
+}
+
+.body--dark .tarjeta-autenticacion {
+  border-color: #2c4b3a;
+  background: #10241b;
+  box-shadow: 0 18px 46px rgb(0 0 0 / 28%);
+}
+
+.body--dark .tarjeta-autenticacion .titulo-autenticacion {
+  color: #f4f7f4;
+}
+
+.body--dark .tarjeta-autenticacion .subtitulo-autenticacion {
+  color: #b3c2b8;
+}
+
+.body--dark .tarjeta-autenticacion .campo-formulario .q-field__control {
+  background: #142f22;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.q-btn__content {
+  font-family: var(--fuente-titulos);
+}
+
+.q-btn {
+  letter-spacing: 0;
+}
+
+.q-card {
+  border-color: var(--borde);
+}
+
+.q-field__native,
+.q-field__input,
+.q-item__label {
+  font-family: var(--fuente-texto);
 }
 
 @media (max-width: 359px) {

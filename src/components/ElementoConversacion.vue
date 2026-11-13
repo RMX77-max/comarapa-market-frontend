@@ -1,7 +1,7 @@
 <template>
   <q-item
     clickable
-    :to="{ name: 'conversacion', params: { id: conversacion.id } }"
+    :to="{ name: rutaConversacion, params: { id: conversacion.id } }"
     class="elemento-conversacion"
   >
     <q-item-section avatar>
@@ -12,6 +12,7 @@
     </q-item-section>
     <q-item-section>
       <q-item-label class="text-weight-medium">{{ conversacion.otra_persona.nombre }}</q-item-label>
+      <q-item-label class="elemento-conversacion__producto" lines="1">{{ conversacion.producto.titulo }}</q-item-label>
       <q-item-label caption lines="1">{{
         conversacion.ultimo_mensaje?.mensaje || 'Conversación iniciada'
       }}</q-item-label>
@@ -33,11 +34,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import AvatarUsuario from './AvatarUsuario.vue';
 import type { Conversacion } from 'src/models/Conversacion';
 import { formatearFechaCorta } from 'src/utils/formatearFecha';
 
 defineProps<{ conversacion: Conversacion }>();
+const ruta = useRoute();
+const rutaConversacion = computed(() =>
+  ruta.path.startsWith('/administracion/') ? 'administracion-mensajes-conversacion' : 'conversacion',
+);
 </script>
 
 <style scoped lang="scss">
@@ -50,6 +57,7 @@ defineProps<{ conversacion: Conversacion }>();
     color: var(--texto-secundario);
     font-size: 0.72rem;
   }
+  &__producto { margin-top:2px; color:var(--azul-marino); font-size:.75rem; font-weight:600; }
 
   &__lateral {
     display: flex;

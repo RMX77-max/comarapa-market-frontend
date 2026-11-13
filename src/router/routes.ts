@@ -26,12 +26,129 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/recuperar-contrasena',
+    component: () => import('layouts/DisenoAutenticacion.vue'),
+    meta: { soloInvitados: true },
+    children: [
+      {
+        path: '',
+        name: 'recuperar-contrasena',
+        component: () => import('pages/PaginaRecuperarContrasena.vue'),
+      },
+    ],
+  },
+  {
+    path: '/restablecer-contrasena',
+    component: () => import('layouts/DisenoAutenticacion.vue'),
+    meta: { soloInvitados: true },
+    children: [
+      {
+        path: '',
+        name: 'restablecer-contrasena',
+        component: () => import('pages/PaginaRestablecerContrasena.vue'),
+      },
+    ],
+  },
+  {
+    path: '/administracion',
+    component: () => import('layouts/DisenoAdministracion.vue'),
+    meta: { requiereAutenticacion: true, requiereAdministrador: true },
+    children: [
+      {
+        path: '',
+        name: 'administracion',
+        component: () => import('pages/administracion/PaginaPanelAdministrativo.vue'),
+        meta: { titulo: 'Panel administrativo' },
+      },
+      {
+        path: 'notificaciones',
+        name: 'administracion-notificaciones',
+        component: () => import('pages/PaginaNotificaciones.vue'),
+        meta: { titulo: 'Notificaciones' },
+      },
+      {
+        path: 'publicaciones',
+        name: 'administracion-publicaciones',
+        component: () => import('pages/administracion/PaginaModeracionPublicaciones.vue'),
+        meta: { titulo: 'Moderación de publicaciones' },
+      },
+      {
+        path: 'usuarios',
+        name: 'administracion-usuarios',
+        component: () => import('pages/administracion/PaginaUsuariosAdministracion.vue'),
+        meta: { titulo: 'Usuarios' },
+      },
+      {
+        path: 'operaciones',
+        name: 'administracion-operaciones',
+        component: () => import('pages/administracion/PaginaOperacionesAdministrativas.vue'),
+        meta: { titulo: 'Centro de operaciones' },
+      },
+      {
+        path: 'mensajes',
+        name: 'administracion-mensajes',
+        component: () => import('pages/PaginaMensajes.vue'),
+        meta: { titulo: 'Mensajes' },
+      },
+      {
+        path: 'mensajes/:id',
+        name: 'administracion-mensajes-conversacion',
+        component: () => import('pages/PaginaConversacion.vue'),
+        meta: { titulo: 'Mensaje' },
+      },
+      {
+        path: 'servicios',
+        name: 'administracion-servicios',
+        component: () => import('pages/administracion/PaginaServiciosEspecialesAdministracion.vue'),
+        meta: { titulo: 'Servicios especiales' },
+      },
+      {
+        path: 'soporte',
+        redirect: { name: 'administracion-operaciones', query: { tab: 'soporte' } },
+      },
+      {
+        path: 'reportes',
+        redirect: { name: 'administracion-operaciones', query: { tab: 'reportes' } },
+      },
+      {
+        path: 'auditoria',
+        name: 'auditoria-administrativa',
+        component: () => import('pages/administracion/PaginaAuditoriaAdministrativa.vue'),
+        meta: { titulo: 'Auditoría', requiereAdministrador: true },
+      },
+    ],
+  },
+  {
     path: '/',
     component: () => import('layouts/DisenoPrincipal.vue'),
+    meta: { requiereAutenticacion: true },
     children: [
       {
         path: '',
         redirect: '/iniciar-sesion',
+      },
+      {
+        path: 'notificaciones',
+        name: 'notificaciones',
+        component: () => import('pages/PaginaNotificaciones.vue'),
+        meta: { titulo: 'Notificaciones' },
+      },
+      { path: 'soporte', name: 'soporte', component: () => import('pages/PaginaSoporte.vue') },
+      { path: 'ordenes', name: 'ordenes', component: () => import('pages/PaginaOrdenes.vue') },
+      {
+        path: 'solicitar-producto',
+        name: 'solicitar-producto',
+        component: () => import('pages/PaginaSolicitarProducto.vue'),
+      },
+      {
+        path: 'solicitar-prestamo',
+        name: 'solicitar-prestamo',
+        component: () => import('pages/PaginaPrestamosRedisenada.vue'),
+      },
+      {
+        path: 'inmuebles',
+        name: 'inmuebles',
+        component: () => import('pages/PaginaInmueblesRedisenada.vue'),
       },
       {
         path: 'inicio',
@@ -49,6 +166,18 @@ const routes: RouteRecordRaw[] = [
         name: 'detalle-producto',
         component: () => import('pages/PaginaDetalleProducto.vue'),
         meta: { titulo: 'Detalle del producto' },
+      },
+      {
+        path: 'vendedores/:id',
+        name: 'perfil-vendedor',
+        component: () => import('pages/PaginaPerfilVendedor.vue'),
+        meta: { titulo: 'Perfil del vendedor' },
+      },
+      {
+        path: 'guardados',
+        name: 'guardados',
+        component: () => import('pages/PaginaGuardados.vue'),
+        meta: { titulo: 'Guardados' },
       },
       {
         path: 'publicar',
@@ -79,6 +208,12 @@ const routes: RouteRecordRaw[] = [
         name: 'editar-perfil',
         component: () => import('pages/PaginaEditarPerfil.vue'),
         meta: { requiereAutenticacion: true, titulo: 'Editar perfil' },
+      },
+      {
+        path: 'ajustes',
+        name: 'ajustes',
+        component: () => import('pages/PaginaAjustes.vue'),
+        meta: { requiereAutenticacion: true, titulo: 'Apariencia' },
       },
       {
         path: 'mis-publicaciones',

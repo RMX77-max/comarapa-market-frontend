@@ -1,8 +1,6 @@
 <template>
   <q-page class="contenedor-pagina">
     <div class="contenedor-formulario">
-      <h1 class="titulo-pagina">Perfil</h1>
-
       <section v-if="usuario" class="perfil-resumen tarjeta-suave">
         <avatar-usuario :nombre="usuario.nombre" :url="usuario.url_foto_perfil" tamano="72px" />
         <div>
@@ -19,11 +17,49 @@
       </section>
 
       <q-list class="opciones-perfil q-mt-lg" separator>
+        <q-item v-if="autenticacion.esAdministrador" clickable :to="{ name: 'administracion' }">
+          <q-item-section avatar
+            ><q-icon name="admin_panel_settings" color="primary"
+          /></q-item-section>
+          <q-item-section>Panel administrativo</q-item-section>
+          <q-item-section side><q-icon name="chevron_right" /></q-item-section>
+        </q-item>
         <q-item clickable :to="{ name: 'mis-publicaciones' }">
           <q-item-section avatar><q-icon name="inventory_2" color="primary" /></q-item-section>
           <q-item-section>Mis publicaciones</q-item-section>
           <q-item-section side><q-icon name="chevron_right" /></q-item-section>
         </q-item>
+        <q-item clickable :to="{ name: 'guardados' }">
+          <q-item-section avatar><q-icon name="bookmark" color="primary" /></q-item-section>
+          <q-item-section>Guardados</q-item-section>
+          <q-item-section side><q-icon name="chevron_right" /></q-item-section>
+        </q-item>
+        <q-item clickable :to="{ name: 'ajustes' }">
+          <q-item-section avatar><q-icon name="contrast" color="primary" /></q-item-section>
+          <q-item-section>Apariencia</q-item-section>
+          <q-item-section side><q-icon name="chevron_right" /></q-item-section>
+        </q-item>
+        <q-item clickable :to="{ name: 'ordenes' }"
+          ><q-item-section avatar><q-icon name="shopping_bag" color="primary" /></q-item-section
+          ><q-item-section>Compras</q-item-section></q-item
+        >
+        <q-item clickable :to="{ name: 'soporte' }"
+          ><q-item-section avatar><q-icon name="support_agent" color="primary" /></q-item-section
+          ><q-item-section>Soporte</q-item-section></q-item
+        >
+        <q-item clickable :to="{ name: 'solicitar-producto' }"
+          ><q-item-section avatar><q-icon name="manage_search" color="primary" /></q-item-section
+          ><q-item-section>Solicitar un producto</q-item-section></q-item
+        >
+        <q-item clickable :to="{ name: 'inmuebles' }"
+          ><q-item-section avatar
+            ><q-icon name="real_estate_agent" color="primary" /></q-item-section
+          ><q-item-section>Inmuebles</q-item-section></q-item
+        >
+        <q-item clickable :to="{ name: 'solicitar-prestamo' }"
+          ><q-item-section avatar><q-icon name="request_quote" color="primary" /></q-item-section
+          ><q-item-section>Solicitar préstamo</q-item-section></q-item
+        >
         <q-item clickable class="text-negative" @click="cerrarSesion">
           <q-item-section avatar><q-icon name="logout" color="negative" /></q-item-section>
           <q-item-section>Cerrar sesión</q-item-section>

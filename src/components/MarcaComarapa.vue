@@ -1,27 +1,26 @@
 <template>
   <div class="marca-comarapa" :class="{ 'marca-comarapa--centrada': centrada }">
-    <img
-      class="marca-comarapa__simbolo"
-      :src="
-        centrada
-          ? '/logos/comarapa-market-completo-360.png'
-          : '/logos/comarapa-market-simbolo-160.png'
-      "
-      :alt="centrada ? 'Comarapa Market' : ''"
-      :aria-hidden="centrada ? undefined : 'true'"
-    />
-
-    <div v-if="!centrada">
-      <div class="marca-comarapa__nombre">Comarapa<br />Market</div>
-      <div class="marca-comarapa__lema">Tierra del bienestar</div>
-      <div v-if="mostrarUbicacion" class="marca-comarapa__ubicacion">Comarapa</div>
-    </div>
-    <div
-      v-else-if="mostrarUbicacion"
-      class="marca-comarapa__ubicacion marca-comarapa__ubicacion--centrada"
+    <router-link
+      v-if="!centrada"
+      class="marca-comarapa__enlace"
+      :to="{ name: 'inicio' }"
+      aria-label="Ir al inicio de Comarapa Market"
     >
-      <q-icon name="place" /> Comarapa
-    </div>
+      <img
+        class="marca-comarapa__logo marca-comarapa__logo--encabezado"
+        src="/logos/comarapa-market-horizontal.png"
+        alt="Comarapa Market"
+        decoding="async"
+      />
+    </router-link>
+    <img
+      v-else
+      class="marca-comarapa__logo"
+      src="/icons/app-store-1024x1024.png"
+      alt="Comarapa Market"
+      decoding="async"
+    />
+    <span v-if="mostrarUbicacion && !centrada" class="marca-comarapa__ubicacion">Comarapa</span>
   </div>
 </template>
 
@@ -41,56 +40,83 @@ withDefaults(
 <style scoped lang="scss">
 .marca-comarapa {
   display: flex;
-  gap: 10px;
-  align-items: center;
-  color: var(--verde-principal);
+  flex: 0 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 3px 0;
+  background: transparent;
 
-  &--centrada {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
+  &__enlace {
+    display: block;
+    line-height: 0;
+    color: inherit;
+    text-decoration: none;
+  }
 
-    .marca-comarapa__simbolo {
-      width: 210px;
-      height: 210px;
+  &__logo {
+    display: block;
+    width: clamp(178px, 22vw, 225px);
+    height: 50px;
+    object-fit: contain;
+    object-position: left center;
+
+    &--encabezado {
+      filter: none;
     }
   }
 
-  &__simbolo {
-    width: 78px;
-    height: 64px;
-    object-fit: contain;
-  }
-
-  &__nombre {
-    font-size: 1.18rem;
-    font-weight: 700;
-    line-height: 0.98;
-  }
-
-  &__lema {
-    margin-top: 1px;
-    color: #82916d;
-    font-size: 0.68rem;
-    letter-spacing: 0.01em;
-  }
-
   &__ubicacion {
-    margin-top: 2px;
-    color: var(--texto-secundario);
-    font-size: 0.75rem;
+    margin: -3px 0 1px 58px;
+    color: #466255;
+    font-size: 0.72rem;
+    line-height: 1;
+  }
 
-    &--centrada {
-      margin-top: -25px;
-      font-size: 0.9rem;
+  &--centrada {
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    text-align: center;
+
+    .marca-comarapa__logo {
+      width: clamp(150px, 44vw, 205px);
+      height: auto;
+      aspect-ratio: 1;
+      object-position: center;
+      border-radius: 22px;
+      box-shadow: 0 10px 24px rgb(0 70 40 / 18%);
+    }
+
+    .marca-comarapa__ubicacion {
+      margin: -12px 0 0;
     }
   }
 }
 
-@media (max-width: 380px) {
-  .marca-comarapa--centrada .marca-comarapa__simbolo {
-    width: 174px;
-    height: 174px;
+@media (max-width: 480px) {
+  .marca-comarapa {
+    padding: 2px 0;
+
+    &__logo {
+      width: 158px;
+      height: 42px;
+    }
+
+    &__logo--encabezado {
+      width: 190px;
+      height: 48px;
+    }
+
+    &--centrada {
+      padding: 0;
+
+      .marca-comarapa__logo {
+        width: min(46vw, 180px);
+        height: auto;
+        border-radius: 18px;
+      }
+    }
   }
 }
 </style>

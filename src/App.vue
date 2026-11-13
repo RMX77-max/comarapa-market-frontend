@@ -6,6 +6,9 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
+import { inicializarTema } from 'src/composables/useTema';
+
+inicializarTema();
 
 const autenticacion = useTiendaAutenticacion();
 const enrutador = useRouter();

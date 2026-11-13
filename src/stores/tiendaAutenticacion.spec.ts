@@ -8,7 +8,7 @@ describe('tiendaAutenticacion', () => {
   it('establece y limpia una sesión', () => {
     const tienda = useTiendaAutenticacion();
     tienda.establecerSesion(
-      { id: 7, nombre: 'Ana', ubicacion: 'Comarapa', url_foto_perfil: null },
+      { id: 7, nombre: 'Ana', ubicacion: 'Comarapa', url_foto_perfil: null, rol: 'usuario' },
       'token-prueba',
     );
     expect(tienda.estaAutenticado).toBe(true);

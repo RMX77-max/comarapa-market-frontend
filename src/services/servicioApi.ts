@@ -3,20 +3,26 @@ import type { AxiosError } from 'axios';
 
 export const CLAVE_SESION = 'comarapa_market_sesion';
 
+const URL_API =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+
 export const servicioApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1',
+  baseURL: URL_API,
   headers: { Accept: 'application/json' },
   timeout: 15000,
 });
 
 const camposArchivo = new Set(['url_imagen', 'url_foto_perfil']);
-const camposListaArchivos = new Set(['imagenes']);
+const camposListaArchivos = new Set(['imagenes', 'imagenes_garantia']);
 
 export function resolverUrlArchivo(url: string | null): string | null {
   if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
 
-  const baseApi = servicioApi.defaults.baseURL || 'http://127.0.0.1:8000/api/v1';
-  const origenApi = new URL(baseApi).origin;
+  const baseApi = servicioApi.defaults.baseURL || URL_API;
+  const origenAplicacion =
+    typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:8000';
+  const origenApi = new URL(baseApi, origenAplicacion).origin;
 
   try {
     const destino = new URL(url, origenApi);
@@ -51,14 +57,14 @@ function normalizarUrlsArchivos(valor: unknown): unknown {
 
 servicioApi.interceptors.request.use((configuracion) => {
   if (typeof window === 'undefined') return configuracion;
-  const sesion = window.localStorage.getItem(CLAVE_SESION);
+  const sesion = window.sessionStorage.getItem(CLAVE_SESION);
   if (!sesion) return configuracion;
 
   try {
     const { token } = JSON.parse(sesion) as { token?: string };
     if (token) configuracion.headers.Authorization = `Bearer ${token}`;
   } catch {
-    window.localStorage.removeItem(CLAVE_SESION);
+    window.sessionStorage.removeItem(CLAVE_SESION);
   }
   return configuracion;
 });
@@ -70,6 +76,7 @@ servicioApi.interceptors.response.use(
   },
   (error: AxiosError) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(CLAVE_SESION);
       window.localStorage.removeItem(CLAVE_SESION);
       window.dispatchEvent(new CustomEvent('comarapa-market:sesion-expirada'));
     }
@@ -79,8 +86,16 @@ servicioApi.interceptors.response.use(
 
 export function obtenerMensajeError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const datos = error.response?.data as { mensaje?: string } | undefined;
-    return datos?.mensaje || 'No fue posible comunicarse con el servidor.';
+    const datos = error.response?.data as
+      | { mensaje?: string; message?: string; errors?: Record<string, string[]> }
+      | undefined;
+    const primerError = datos?.errors
+      ? Object.values(datos.errors).flat().find((mensaje) => Boolean(mensaje))
+      : undefined;
+    const mensaje = datos?.mensaje || datos?.message || primerError;
+    if (mensaje) return mensaje;
+    if (!error.response) return 'No fue posible comunicarse con el servidor.';
+    return `La solicitud no pudo completarse (código ${error.response.status}).`;
   }
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
 }

@@ -15,7 +15,7 @@
     <template #option="alcance">
       <q-item v-bind="alcance.itemProps">
         <q-item-section avatar>
-          <q-avatar color="green-1" size="40px">
+          <q-avatar class="selector-categoria__avatar" size="40px">
             <img
               v-if="obtenerImagenCategoria(alcance.opt.slug)"
               :src="obtenerImagenCategoria(alcance.opt.slug)"
@@ -39,3 +39,9 @@ import { obtenerImagenCategoria } from 'src/utils/imagenesCategoria';
 defineProps<{ modelValue: number | null; opciones: Categoria[] }>();
 defineEmits<{ 'update:modelValue': [valor: number | null] }>();
 </script>
+
+<style scoped lang="scss">
+.selector-categoria__avatar {
+  background: var(--azul-suave);
+}
+</style>

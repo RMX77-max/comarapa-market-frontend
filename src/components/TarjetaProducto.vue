@@ -14,8 +14,17 @@
         <template #error><imagen-producto-vacia /></template>
       </q-img>
       <imagen-producto-vacia v-else />
+      <span v-if="mostrarTipo" class="tarjeta-producto__tipo">
+        <q-icon name="sell" /> En venta
+      </span>
       <span v-if="mostrarEstado && producto.estado === 'vendido'" class="tarjeta-producto__estado"
         >Vendido</span
+      >
+      <span
+        v-else-if="mostrarEstado && producto.estado_moderacion !== 'aprobada'"
+        class="tarjeta-producto__estado"
+        :class="`tarjeta-producto__estado--${producto.estado_moderacion}`"
+        >{{ etiquetaModeracion }}</span
       >
     </div>
 
@@ -32,14 +41,26 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import ImagenProductoVacia from './ImagenProductoVacia.vue';
 import type { Producto } from 'src/models/Producto';
 import { formatearPrecio } from 'src/utils/formatearPrecio';
 import { formatearFechaCorta } from 'src/utils/formatearFecha';
 
-withDefaults(defineProps<{ producto: Producto; mostrarEstado?: boolean }>(), {
-  mostrarEstado: false,
-});
+const propiedades = withDefaults(
+  defineProps<{ producto: Producto; mostrarEstado?: boolean; mostrarTipo?: boolean }>(),
+  { mostrarEstado: false, mostrarTipo: true },
+);
+const etiquetaModeracion = computed(
+  () =>
+    ({
+      pendiente: 'En revisión',
+      rechazada: 'Rechazada',
+      correccion: 'Requiere cambios',
+      oculta: 'Oculta',
+      aprobada: 'Aprobada',
+    })[propiedades.producto.estado_moderacion],
+);
 defineEmits<{ abrir: [producto: Producto] }>();
 </script>
 
@@ -61,7 +82,7 @@ defineEmits<{ abrir: [producto: Producto] }>();
   }
 
   &:focus-within {
-    outline: 2px solid var(--verde-secundario);
+    outline: 2px solid var(--coral);
     outline-offset: 2px;
   }
 
@@ -80,6 +101,33 @@ defineEmits<{ abrir: [producto: Producto] }>();
     color: white;
     font-size: 0.72rem;
   }
+  &__tipo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgb(0 70 40 / 92%);
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    backdrop-filter: blur(6px);
+  }
+  &__estado--pendiente {
+    background: rgb(156 99 22 / 92%);
+  }
+  &__estado--rechazada,
+  &__estado--oculta {
+    background: rgb(166 45 45 / 92%);
+  }
+  &__estado--correccion {
+    background: rgb(54 91 151 / 92%);
+  }
 
   &__contenido {
     padding: 12px 14px 14px;
@@ -89,8 +137,10 @@ defineEmits<{ abrir: [producto: Producto] }>();
       min-height: 40px;
       margin: 4px 0 2px;
       overflow: hidden;
-      font-size: 1rem;
-      font-weight: 500;
+      color: var(--azul-marino);
+      font-family: var(--fuente-titulos);
+      font-size: var(--tamano-tarjeta);
+      font-weight: 600;
       line-height: 1.3;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
@@ -99,7 +149,8 @@ defineEmits<{ abrir: [producto: Producto] }>();
     p {
       margin: 0;
       color: var(--verde-principal);
-      font-size: 1.14rem;
+      font-family: var(--fuente-titulos);
+      font-size: var(--tamano-precio);
       font-weight: 700;
     }
   }
@@ -110,7 +161,7 @@ defineEmits<{ abrir: [producto: Producto] }>();
     margin-top: 5px;
     overflow: hidden;
     color: var(--texto-secundario);
-    font-size: 0.72rem;
+    font-size: var(--tamano-meta);
     white-space: nowrap;
 
     span:first-child {

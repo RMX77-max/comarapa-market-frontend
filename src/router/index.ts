@@ -35,7 +35,8 @@ export default defineRouter(function ({ store }) {
   });
 
   Router.beforeEach((to) => {
-    const estaAutenticado = useTiendaAutenticacion(store).estaAutenticado;
+    const autenticacion = useTiendaAutenticacion(store);
+    const estaAutenticado = autenticacion.estaAutenticado;
 
     if (to.meta.requiereAutenticacion && !estaAutenticado) {
       return {
@@ -46,6 +47,14 @@ export default defineRouter(function ({ store }) {
 
     if (to.meta.soloInvitados && estaAutenticado) {
       return { name: 'inicio' };
+    }
+
+    if (to.meta.requiereAdministrador && !autenticacion.esAdministrador) {
+      return { name: 'inicio' };
+    }
+
+    if (to.meta.requiereSuperadministrador && !autenticacion.esSuperadministrador) {
+      return { name: 'administracion' };
     }
 
     return true;
