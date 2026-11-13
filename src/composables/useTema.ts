@@ -4,7 +4,7 @@ import { Dark } from 'quasar';
 export type PreferenciaTema = 'claro' | 'oscuro' | 'sistema';
 
 const CLAVE_TEMA = 'comarapa_market_tema';
-const preferencia = ref<PreferenciaTema>('sistema');
+const preferencia = ref<PreferenciaTema>('claro');
 let inicializado = false;
 
 function aplicarTema(valor: PreferenciaTema): void {
@@ -17,7 +17,7 @@ export function inicializarTema(): void {
   const guardado = window.localStorage.getItem(CLAVE_TEMA);
   preferencia.value = ['claro', 'oscuro', 'sistema'].includes(String(guardado))
     ? (guardado as PreferenciaTema)
-    : 'sistema';
+    : 'claro';
   aplicarTema(preferencia.value);
   inicializado = true;
 }
