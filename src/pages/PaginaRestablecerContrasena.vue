@@ -93,14 +93,14 @@ const mostrarClave = ref(false);
 const q = useQuasar();
 const ruta = useRoute();
 const router = useRouter();
-const enlaceCompleto = computed(() => Boolean(ruta.query.email && ruta.query.token));
+const enlaceCompleto = computed(() => Boolean(ruta.query.solicitud && ruta.query.secreto));
 
 async function guardar(): Promise<void> {
   cargando.value = true;
   try {
     await restablecerContrasena({
-      email: String(ruta.query.email || ''),
-      token: String(ruta.query.token || ''),
+      solicitud_id: String(ruta.query.solicitud || ''),
+      secreto: String(ruta.query.secreto || ''),
       contrasena: clave.value,
       contrasena_confirmation: confirmacion.value,
     });

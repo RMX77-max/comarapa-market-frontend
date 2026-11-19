@@ -5,34 +5,30 @@
         <div class="icono-autenticacion" aria-hidden="true"><q-icon name="lock_reset" /></div>
         <h1 class="titulo-autenticacion">Recuperar contraseña</h1>
         <p class="subtitulo-autenticacion">
-          Escribe el correo de tu cuenta y te enviaremos un enlace seguro para crear una nueva
-          contraseña.
+          Escribe tu celular para recibir un código por WhatsApp.
         </p>
       </header>
 
-      <q-banner v-if="enviado" class="aviso-recuperacion" rounded>
-        <template #avatar><q-icon name="mark_email_read" /></template>
-        Si existe una cuenta con <strong>{{ correoEnviado }}</strong>, recibirás el enlace. Revisa
-        también la carpeta de correo no deseado.
+      <q-banner v-if="solicitud" class="aviso-recuperacion" rounded>
+        <template #avatar><q-icon name="sms" /></template>
+        Si el celular está registrado, recibirás un código por WhatsApp.
       </q-banner>
 
-      <q-form v-else class="formulario-recuperacion" @submit="enviar">
+      <q-form v-if="!solicitud" class="formulario-recuperacion" @submit="enviar">
         <q-input
-          v-model.trim="email"
+          v-model.trim="telefono"
           class="campo-formulario"
-          type="email"
-          label="Correo electrónico"
-          autocomplete="email"
-          inputmode="email"
+          label="Celular"
+          prefix="+591"
+          autocomplete="tel"
+          inputmode="numeric"
+          maxlength="8"
           outlined
           lazy-rules
           :disable="cargando"
-          :rules="[
-            (valor) => Boolean(valor) || 'Ingresa tu correo electrónico.',
-            (valor) => validarEmail(valor) || 'Ingresa un correo electrónico válido.',
-          ]"
+          :rules="[(valor) => /^\d{8}$/.test(valor) || 'Ingresa los 8 dígitos de tu celular.']"
         >
-          <template #prepend><q-icon name="mail_outline" /></template>
+          <template #prepend><q-icon name="phone_android" /></template>
         </q-input>
 
         <q-btn
@@ -41,20 +37,32 @@
           color="primary"
           unelevated
           no-caps
-          label="Enviar enlace de recuperación"
+          label="Solicitar código"
           :loading="cargando"
         />
       </q-form>
 
-      <div v-if="enviado" class="acciones-recuperacion">
+      <div v-if="solicitud" class="acciones-recuperacion">
+        <q-input
+          v-model.trim="codigo"
+          outlined
+          inputmode="numeric"
+          maxlength="6"
+          label="Código de 6 dígitos"
+          autocomplete="one-time-code"
+        >
+          <template #prepend><q-icon name="password" /></template>
+        </q-input>
         <q-btn
-          class="boton-secundario full-width"
-          outline
-          no-caps
           color="primary"
-          label="Usar otro correo"
-          @click="enviado = false"
+          unelevated
+          no-caps
+          label="Verificar código"
+          :disable="codigo.length !== 6"
+          :loading="cargando"
+          @click="comprobar"
         />
+        <q-btn flat no-caps color="primary" label="Usar otro número" @click="solicitud = null" />
       </div>
 
       <q-btn
@@ -72,27 +80,41 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
-import { solicitarRecuperacion } from 'src/services/servicioOperaciones';
+import {
+  solicitarRecuperacion,
+  verificarCodigoRecuperacion,
+  type RecuperacionManual,
+} from 'src/services/servicioOperaciones';
 import { obtenerMensajeError } from 'src/services/servicioApi';
 
-const email = ref('');
-const correoEnviado = ref('');
+const telefono = ref('');
 const cargando = ref(false);
-const enviado = ref(false);
+const solicitud = ref<RecuperacionManual | null>(null);
+const codigo = ref('');
 const q = useQuasar();
-
-function validarEmail(valor: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
-}
 
 async function enviar(): Promise<void> {
   cargando.value = true;
   try {
-    correoEnviado.value = email.value.trim().toLowerCase();
-    await solicitarRecuperacion(correoEnviado.value);
-    enviado.value = true;
+    solicitud.value = await solicitarRecuperacion(`+591${telefono.value}`);
   } catch (error) {
     q.notify({ type: 'negative', message: obtenerMensajeError(error) });
+  } finally {
+    cargando.value = false;
+  }
+}
+async function comprobar(): Promise<void> {
+  if (!solicitud.value || codigo.value.length !== 6) return;
+  cargando.value = true;
+  try {
+    await verificarCodigoRecuperacion(
+      solicitud.value.solicitud_id,
+      solicitud.value.secreto,
+      codigo.value,
+    );
+    window.location.hash = `#/restablecer-contrasena?solicitud=${solicitud.value.solicitud_id}&secreto=${encodeURIComponent(solicitud.value.secreto)}`;
+  } catch (e) {
+    q.notify({ type: 'negative', message: obtenerMensajeError(e) });
   } finally {
     cargando.value = false;
   }
@@ -100,7 +122,9 @@ async function enviar(): Promise<void> {
 </script>
 
 <style scoped lang="scss">
-.tarjeta-recuperacion { max-width: 480px; }
+.tarjeta-recuperacion {
+  max-width: 480px;
+}
 .icono-autenticacion {
   display: grid;
   width: 64px;
@@ -113,7 +137,10 @@ async function enviar(): Promise<void> {
   place-items: center;
 }
 .formulario-recuperacion,
-.acciones-recuperacion { display: grid; gap: 16px; }
+.acciones-recuperacion {
+  display: grid;
+  gap: 16px;
+}
 .aviso-recuperacion {
   margin-bottom: 18px;
   border: 1px solid var(--borde);
@@ -122,12 +149,31 @@ async function enviar(): Promise<void> {
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
-.aviso-recuperacion :deep(.q-banner__avatar) { color: var(--coral); }
-.volver-autenticacion { margin-top: 12px; color: var(--texto-secundario); }
+.aviso-recuperacion :deep(.q-banner__avatar) {
+  color: var(--coral);
+}
+.volver-autenticacion {
+  margin-top: 12px;
+  color: var(--texto-secundario);
+}
 @media (max-width: 480px) {
-  .tarjeta-recuperacion { padding: 24px 20px; }
-  .icono-autenticacion { width: 56px; height: 56px; margin-bottom: 14px; font-size: 30px; }
-  .titulo-autenticacion { margin-top: 0; font-size: clamp(1.6rem, 8vw, 2rem); overflow-wrap: anywhere; }
-  .subtitulo-autenticacion { font-size: .92rem; line-height: 1.5; }
+  .tarjeta-recuperacion {
+    padding: 24px 20px;
+  }
+  .icono-autenticacion {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 14px;
+    font-size: 30px;
+  }
+  .titulo-autenticacion {
+    margin-top: 0;
+    font-size: clamp(1.6rem, 8vw, 2rem);
+    overflow-wrap: anywhere;
+  }
+  .subtitulo-autenticacion {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
 }
 </style>

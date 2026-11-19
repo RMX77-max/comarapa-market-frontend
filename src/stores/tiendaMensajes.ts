@@ -28,6 +28,13 @@ export const useTiendaMensajes = defineStore('mensajes', {
         this.cargando = false;
       }
     },
+    async refrescarConversaciones(): Promise<void> {
+      try {
+        this.conversaciones = (await listarConversaciones()).conversaciones;
+      } catch {
+        // El refresco silencioso no reemplaza el contenido visible por un error temporal.
+      }
+    },
     async cargarConversacion(id: number) {
       this.cargando = true;
       this.error = '';
@@ -39,6 +46,21 @@ export const useTiendaMensajes = defineStore('mensajes', {
         this.error = obtenerMensajeError(error);
       } finally {
         this.cargando = false;
+      }
+    },
+    async refrescarConversacion(id: number): Promise<boolean> {
+      try {
+        const datos = await obtenerConversacion(id);
+        const ultimoActual = this.mensajes.at(-1)?.id ?? 0;
+        const ultimoRecibido = datos.mensajes.at(-1)?.id ?? 0;
+        const huboCambios =
+          ultimoActual !== ultimoRecibido ||
+          this.conversacionActual?.operacion?.estado !== datos.conversacion.operacion?.estado;
+        this.conversacionActual = datos.conversacion;
+        this.mensajes = datos.mensajes;
+        return huboCambios;
+      } catch {
+        return false;
       }
     },
     async enviar(id: number, contenido: string) {

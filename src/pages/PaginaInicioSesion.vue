@@ -12,21 +12,19 @@
           error
         }}</q-banner>
         <q-input
-          v-model="email"
+          v-model="identificador"
           class="campo-formulario"
-          label="Correo electrónico"
-          type="email"
-          autocomplete="email"
+          label="Celular o correo"
+          autocomplete="username"
           outlined
           lazy-rules
           :disable="cargando"
           :rules="[
-            (valor) => Boolean(valor) || 'El correo electrónico es obligatorio.',
-            (valor) => validarEmail(valor) || 'Ingresa un correo electrónico válido.',
+            (valor) => Boolean(valor) || 'Ingresa tu celular o correo.',
           ]"
         >
           <template #prepend>
-            <q-icon name="mail_outline" size="20px" />
+            <q-icon name="person_outline" size="20px" />
           </template>
         </q-input>
 
@@ -67,6 +65,7 @@
           unelevated
           :loading="cargando"
         />
+        <q-btn flat no-caps color="primary" label="¿Olvidaste tu contraseña?" :to="{name:'recuperar-contrasena'}" />
         <q-btn
           class="boton-secundario full-width"
           color="primary"
@@ -91,22 +90,18 @@ import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 
 const ruta = useRoute();
 const enrutador = useRouter();
-const email = ref('');
+const identificador = ref('');
 const contrasena = ref('');
 const mostrarContrasena = ref(false);
 const cargando = ref(false);
 const error = ref('');
 const autenticacion = useTiendaAutenticacion();
 
-function validarEmail(valor: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
-}
-
 async function iniciarSesion(): Promise<void> {
   cargando.value = true;
   error.value = '';
   try {
-    const sesion = await solicitarInicioSesion(email.value.trim().toLowerCase(), contrasena.value);
+    const sesion = await solicitarInicioSesion(identificador.value.trim().toLowerCase(), contrasena.value);
     autenticacion.establecerSesion(sesion.usuario, sesion.token);
     const redireccion = ruta.query.redireccion;
     const destino =

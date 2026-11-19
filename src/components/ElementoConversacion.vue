@@ -3,6 +3,7 @@
     clickable
     :to="{ name: rutaConversacion, params: { id: conversacion.id } }"
     class="elemento-conversacion"
+    :class="{ 'elemento-conversacion--no-leida': conversacion.no_leida }"
   >
     <q-item-section avatar>
       <avatar-usuario
@@ -11,11 +12,22 @@
       />
     </q-item-section>
     <q-item-section>
-      <q-item-label class="text-weight-medium">{{ conversacion.otra_persona.nombre }}</q-item-label>
-      <q-item-label class="elemento-conversacion__producto" lines="1">{{ conversacion.producto.titulo }}</q-item-label>
-      <q-item-label caption lines="1">{{
-        conversacion.ultimo_mensaje?.mensaje || 'Conversación iniciada'
+      <q-item-label
+        :class="{
+          'text-weight-bold': conversacion.no_leida,
+          'text-weight-medium': !conversacion.no_leida,
+        }"
+        >{{ conversacion.otra_persona.nombre }}</q-item-label
+      >
+      <q-item-label class="elemento-conversacion__producto" lines="1">{{
+        conversacion.producto.titulo
       }}</q-item-label>
+      <q-item-label
+        caption
+        lines="1"
+        :class="{ 'elemento-conversacion__mensaje--no-leido': conversacion.no_leida }"
+        >{{ conversacion.ultimo_mensaje?.mensaje || 'Conversación iniciada' }}</q-item-label
+      >
     </q-item-section>
     <q-item-section side top>
       <div class="elemento-conversacion__lateral">
@@ -27,6 +39,7 @@
         <span class="elemento-conversacion__fecha">{{
           formatearFechaCorta(conversacion.fecha_ultima_actividad)
         }}</span>
+        <q-badge v-if="conversacion.no_leida" rounded color="negative" label="1" />
         <q-icon name="chevron_right" />
       </div>
     </q-item-section>
@@ -43,7 +56,9 @@ import { formatearFechaCorta } from 'src/utils/formatearFecha';
 defineProps<{ conversacion: Conversacion }>();
 const ruta = useRoute();
 const rutaConversacion = computed(() =>
-  ruta.path.startsWith('/administracion/') ? 'administracion-mensajes-conversacion' : 'conversacion',
+  ruta.path.startsWith('/administracion/')
+    ? 'administracion-mensajes-conversacion'
+    : 'conversacion',
 );
 </script>
 
@@ -52,12 +67,29 @@ const rutaConversacion = computed(() =>
   min-height: 92px;
   padding: 14px 6px;
   border-bottom: 1px solid var(--borde);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
+
+  &--no-leida {
+    border-left: 4px solid var(--q-negative);
+    background: color-mix(in srgb, var(--q-negative) 5%, var(--fondo));
+  }
 
   &__fecha {
     color: var(--texto-secundario);
     font-size: 0.72rem;
   }
-  &__producto { margin-top:2px; color:var(--azul-marino); font-size:.75rem; font-weight:600; }
+  &__producto {
+    margin-top: 2px;
+    color: var(--azul-marino);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  &__mensaje--no-leido {
+    color: var(--texto-principal) !important;
+    font-weight: 700;
+  }
 
   &__lateral {
     display: flex;

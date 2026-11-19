@@ -10,7 +10,8 @@ interface DatosSesion {
 
 export async function registrar(datos: {
   nombre: string;
-  email: string;
+  telefono: string;
+  email?: string;
   contrasena: string;
   confirmacion_contrasena: string;
 }): Promise<DatosSesion> {
@@ -18,12 +19,36 @@ export async function registrar(datos: {
   return respuesta.data.datos;
 }
 
-export async function iniciarSesion(email: string, contrasena: string): Promise<DatosSesion> {
+export async function iniciarSesion(
+  identificador: string,
+  contrasena: string,
+): Promise<DatosSesion> {
   const respuesta = await servicioApi.post<RespuestaApi<DatosSesion>>('/iniciar-sesion', {
-    email,
+    identificador,
     contrasena,
   });
   return respuesta.data.datos;
+}
+
+export interface SolicitudVerificacionTelefono {
+  solicitud_id: number;
+  telefono: string;
+}
+export async function solicitarVerificacionTelefono(
+  telefono?: string,
+): Promise<SolicitudVerificacionTelefono> {
+  return (
+    await servicioApi.post<RespuestaApi<SolicitudVerificacionTelefono>>(
+      '/telefono/verificacion',
+      telefono ? { telefono } : {},
+    )
+  ).data.datos;
+}
+export async function confirmarVerificacionTelefono(
+  solicitud_id: number,
+  codigo: string,
+): Promise<void> {
+  await servicioApi.post('/telefono/verificacion/confirmar', { solicitud_id, codigo });
 }
 
 export async function obtenerUsuarioAutenticado(): Promise<Usuario> {

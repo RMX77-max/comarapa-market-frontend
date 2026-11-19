@@ -8,8 +8,11 @@ export interface ProductoConversacion {
   url_imagen: string | null;
   estado: EstadoProducto;
   precio: number;
+  precio_minimo?: number | null;
   descripcion: string;
   ubicacion: string;
+  direccion_recoleccion?: string | null;
+  ubicacion_recoleccion_url?: string | null;
 }
 
 export interface PersonaConversacion {
@@ -27,6 +30,7 @@ export interface Conversacion {
   estado: 'nueva' | 'en_atencion' | 'resuelta' | 'cerrada' | 'archivada';
   tipo: 'consulta_producto' | 'historial_directo';
   puede_responder: boolean;
+  no_leida?: boolean;
   vendedor?: { id: number; nombre: string; email: string };
   operacion: OperacionVenta | null;
 }

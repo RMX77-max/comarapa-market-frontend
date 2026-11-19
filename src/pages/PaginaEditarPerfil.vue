@@ -7,6 +7,36 @@
       </div>
 
       <q-form class="formulario-perfil" @submit="guardarPerfil">
+        <section class="editor-portada">
+          <img v-if="vistaPreviaPortada" :src="vistaPreviaPortada" alt="Vista previa de portada" />
+          <div v-else class="portada-predeterminada"><q-icon name="landscape" /></div>
+          <div class="acciones-portada">
+            <q-btn
+              outline
+              color="primary"
+              no-caps
+              icon="image"
+              label="Cambiar portada"
+              @click="entradaPortada?.click()"
+            />
+            <q-btn
+              v-if="vistaPreviaPortada"
+              flat
+              color="negative"
+              no-caps
+              icon="delete_outline"
+              label="Quitar"
+              @click="quitarPortada"
+            />
+          </div>
+        </section>
+        <input
+          ref="entradaPortada"
+          class="entrada-foto"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          @change="seleccionarPortada"
+        />
         <button
           class="foto-perfil"
           type="button"
@@ -30,6 +60,17 @@
           outlined
           lazy-rules
           :rules="[(v) => Boolean(v.trim()) || 'El nombre es obligatorio.']"
+        />
+        <q-input
+          v-model="biografia"
+          class="campo-formulario"
+          type="textarea"
+          autogrow
+          counter
+          maxlength="300"
+          label="Biografía"
+          hint="Una presentación breve para tu perfil público."
+          outlined
         />
         <q-input
           v-model="ubicacion"
@@ -66,10 +107,15 @@ const autenticacion = useTiendaAutenticacion();
 const usuario = computed(() => autenticacion.usuario);
 const nombre = ref(usuario.value?.nombre ?? '');
 const ubicacion = ref(usuario.value?.ubicacion ?? 'Comarapa');
+const biografia = ref(usuario.value?.biografia ?? '');
 const vistaPrevia = ref<string | null>(usuario.value?.url_foto_perfil ?? null);
+const vistaPreviaPortada = ref<string | null>(usuario.value?.url_foto_portada ?? null);
 const entradaFoto = ref<HTMLInputElement | null>(null);
+const entradaPortada = ref<HTMLInputElement | null>(null);
 const guardando = ref(false);
 const foto = ref<File>();
+const portada = ref<File>();
+const eliminarPortada = ref(false);
 const q = useQuasar();
 
 function seleccionarFoto(evento: Event): void {
@@ -85,6 +131,23 @@ function seleccionarFoto(evento: Event): void {
   lector.readAsDataURL(archivo);
 }
 
+function seleccionarPortada(evento: Event): void {
+  const archivo = (evento.target as HTMLInputElement).files?.[0];
+  if (!archivo || archivo.size > 5 * 1024 * 1024) return;
+  portada.value = archivo;
+  eliminarPortada.value = false;
+  const lector = new FileReader();
+  lector.addEventListener('load', () => {
+    vistaPreviaPortada.value = typeof lector.result === 'string' ? lector.result : null;
+  });
+  lector.readAsDataURL(archivo);
+}
+function quitarPortada(): void {
+  portada.value = undefined;
+  vistaPreviaPortada.value = null;
+  eliminarPortada.value = true;
+}
+
 async function guardarPerfil(): Promise<void> {
   if (!usuario.value) return;
   guardando.value = true;
@@ -92,7 +155,10 @@ async function guardarPerfil(): Promise<void> {
     const actualizado = await actualizarPerfil({
       nombre: nombre.value.trim(),
       ubicacion: ubicacion.value.trim(),
+      biografia: biografia.value.trim(),
       ...(foto.value ? { foto: foto.value } : {}),
+      ...(portada.value ? { portada: portada.value } : {}),
+      ...(eliminarPortada.value ? { eliminarPortada: true } : {}),
     });
     autenticacion.actualizarUsuario(actualizado);
     await enrutador.replace({ name: 'perfil' });
@@ -108,6 +174,29 @@ async function guardarPerfil(): Promise<void> {
 .formulario-perfil {
   display: grid;
   gap: 18px;
+}
+.editor-portada {
+  display: grid;
+  gap: 12px;
+}
+.editor-portada > img,
+.portada-predeterminada {
+  width: 100%;
+  height: clamp(150px, 30vw, 230px);
+  border-radius: 18px;
+  object-fit: cover;
+}
+.portada-predeterminada {
+  display: grid;
+  color: #409951;
+  background: linear-gradient(135deg, #edf3eb, #9bdf9d);
+  font-size: 54px;
+  place-items: center;
+}
+.acciones-portada {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .foto-perfil {
   display: grid;

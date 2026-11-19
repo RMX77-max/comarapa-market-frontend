@@ -15,69 +15,90 @@
       @accion="volver"
     />
 
-    <div v-else class="contenido-conversacion" :class="{ 'contenido-conversacion--administracion': enAdministracion }">
+    <div
+      v-else
+      class="contenido-conversacion"
+      :class="{ 'contenido-conversacion--administracion': enAdministracion }"
+    >
       <section class="columna-chat">
-      <header class="cabecera-chat">
-        <q-btn flat round icon="arrow_back" aria-label="Volver" @click="volver" />
-        <avatar-usuario
-          :nombre="conversacion.otra_persona.nombre"
-          :url="conversacion.otra_persona.url_foto_perfil"
-          tamano="42px"
-        />
-        <div>
-          <strong>{{ conversacion.otra_persona.nombre }}</strong
-          ><span>{{ conversacion.producto.titulo }}</span>
-        </div>
-        <q-img
-          v-if="conversacion.producto.url_imagen"
-          class="cabecera-chat__producto"
-          :src="conversacion.producto.url_imagen"
-          :alt="conversacion.producto.titulo"
-        />
-      </header>
+        <header class="cabecera-chat">
+          <q-btn flat round icon="arrow_back" aria-label="Volver" @click="volver" />
+          <avatar-usuario
+            :nombre="conversacion.otra_persona.nombre"
+            :url="conversacion.otra_persona.url_foto_perfil"
+            tamano="42px"
+          />
+          <div>
+            <strong>{{ conversacion.otra_persona.nombre }}</strong
+            ><span>{{ conversacion.producto.titulo }}</span>
+          </div>
+          <q-img
+            v-if="conversacion.producto.url_imagen"
+            class="cabecera-chat__producto"
+            :src="conversacion.producto.url_imagen"
+            :alt="conversacion.producto.titulo"
+          />
+        </header>
 
-      <main ref="contenedorMensajes" class="mensajes-chat" aria-live="polite">
-        <burbuja-mensaje
-          v-for="elemento in mensajes"
-          :key="elemento.id"
-          :mensaje="elemento"
-          :propio="elemento.remitente.id === usuario?.id"
-        />
-        <panel-operacion-venta
-          v-if="!enAdministracion && conversacion.operacion"
-          :conversacion="conversacion"
-          :es-administrador="false"
-          @actualizada="recargar"
-        />
-      </main>
+        <main ref="contenedorMensajes" class="mensajes-chat" aria-live="polite">
+          <burbuja-mensaje
+            v-for="elemento in mensajes"
+            :key="elemento.id"
+            :mensaje="elemento"
+            :propio="elemento.remitente.id === usuario?.id"
+          />
+          <panel-operacion-venta
+            v-if="!enAdministracion && conversacion.operacion"
+            :conversacion="conversacion"
+            :es-administrador="false"
+            :ubicacion-compartida="ultimaUbicacionCompartida"
+            @actualizada="recargar"
+          />
+        </main>
 
-      <q-banner v-if="!conversacion.puede_responder" class="aviso-archivado">Esta conversación pertenece al historial anterior y es de solo lectura.</q-banner>
-      <q-form v-else class="compositor-chat" @submit="enviarMensaje">
-        <q-input
-          v-model="mensaje"
-          class="campo-formulario"
-          placeholder="Escribe un mensaje"
-          maxlength="2000"
-          outlined
-          dense
-          hide-bottom-space
-          aria-label="Escribe un mensaje"
-        />
-        <q-btn
-          color="primary"
-          icon="send"
-          round
-          unelevated
-          type="submit"
-          aria-label="Enviar mensaje"
-          :disable="!mensaje.trim()"
-        />
-      </q-form>
+        <q-banner v-if="!conversacion.puede_responder" class="aviso-archivado"
+          >Esta conversación pertenece al historial anterior y es de solo lectura.</q-banner
+        >
+        <q-form v-else class="compositor-chat" @submit="enviarMensaje">
+          <q-btn
+            flat
+            round
+            color="primary"
+            icon="add_location_alt"
+            aria-label="Compartir mi ubicación"
+            :loading="compartiendoUbicacion"
+            @pointerdown.prevent
+            @click="compartirUbicacion"
+          >
+            <q-tooltip>Compartir mi ubicación</q-tooltip>
+          </q-btn>
+          <q-input
+            v-model="mensaje"
+            class="campo-formulario"
+            placeholder="Escribe un mensaje"
+            maxlength="2000"
+            outlined
+            dense
+            hide-bottom-space
+            aria-label="Escribe un mensaje"
+          />
+          <q-btn
+            color="primary"
+            icon="send"
+            round
+            unelevated
+            type="submit"
+            aria-label="Enviar mensaje"
+            :disable="!mensaje.trim()"
+            @pointerdown.prevent
+          />
+        </q-form>
       </section>
       <panel-operacion-venta
         v-if="enAdministracion"
         :conversacion="conversacion"
         :es-administrador="true"
+        :ubicacion-compartida="ultimaUbicacionCompartida"
         @actualizada="recargar"
       />
     </div>
@@ -106,10 +127,23 @@ const conversacion = computed(() => tienda.conversacionActual);
 const usuario = computed(() => autenticacion.usuario);
 const mensajes = computed(() => tienda.mensajes);
 const mensaje = ref('');
+const compartiendoUbicacion = ref(false);
 const contenedorMensajes = ref<HTMLElement | null>(null);
 const paginaElemento = ref<{ $el?: HTMLElement } | HTMLElement | null>(null);
 const alturaDisponible = ref('calc(100dvh - 72px)');
 const enAdministracion = computed(() => ruta.path.startsWith('/administracion/'));
+let temporizadorMensajes: ReturnType<typeof setInterval> | undefined;
+let actualizandoMensajes = false;
+const ultimaUbicacionCompartida = computed(() => {
+  for (let indice = mensajes.value.length - 1; indice >= 0; indice -= 1) {
+    const contenido = mensajes.value[indice]?.mensaje ?? '';
+    const coincidencia = contenido.match(
+      /https:\/\/www\.google\.com\/maps\?q=-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?/i,
+    );
+    if (coincidencia?.[0]) return coincidencia[0];
+  }
+  return '';
+});
 
 function actualizarAlturaDisponible(): void {
   const referencia = paginaElemento.value;
@@ -144,8 +178,48 @@ async function enviarMensaje(): Promise<void> {
   }
 }
 
+function compartirUbicacion(): void {
+  if (!navigator.geolocation) {
+    q.notify({ type: 'negative', message: 'Este dispositivo no permite obtener la ubicación.' });
+    return;
+  }
+  compartiendoUbicacion.value = true;
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      const url = `https://www.google.com/maps?q=${coords.latitude.toFixed(7)},${coords.longitude.toFixed(7)}`;
+      mensaje.value = `📍 Mi ubicación actual\n${url}`;
+      compartiendoUbicacion.value = false;
+      void enviarMensaje();
+    },
+    (error) => {
+      const textos: Record<number, string> = {
+        1: 'Debes permitir el acceso a tu ubicación.',
+        2: 'Activa el GPS e inténtalo nuevamente.',
+        3: 'La ubicación tardó demasiado. Inténtalo otra vez.',
+      };
+      q.notify({
+        type: 'negative',
+        message: textos[error.code] ?? 'No pudimos obtener tu ubicación.',
+      });
+      compartiendoUbicacion.value = false;
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+  );
+}
+
 async function recargar(): Promise<void> {
   await tienda.cargarConversacion(conversacionId);
+}
+
+async function actualizarMensajesSilenciosamente(): Promise<void> {
+  if (actualizandoMensajes) return;
+  actualizandoMensajes = true;
+  try {
+    const huboCambios = await tienda.refrescarConversacion(conversacionId);
+    if (huboCambios) await desplazarAlFinal();
+  } finally {
+    actualizandoMensajes = false;
+  }
 }
 
 onMounted(async () => {
@@ -156,8 +230,11 @@ onMounted(async () => {
   window.visualViewport?.addEventListener('scroll', actualizarAlturaDisponible, { passive: true });
   await tienda.cargarConversacion(conversacionId);
   await desplazarAlFinal();
+  await actualizarMensajesSilenciosamente();
+  temporizadorMensajes = setInterval(() => void actualizarMensajesSilenciosamente(), 2000);
 });
 onBeforeUnmount(() => {
+  if (temporizadorMensajes) clearInterval(temporizadorMensajes);
   window.removeEventListener('resize', actualizarAlturaDisponible);
   window.visualViewport?.removeEventListener('resize', actualizarAlturaDisponible);
   window.visualViewport?.removeEventListener('scroll', actualizarAlturaDisponible);
@@ -172,14 +249,34 @@ onBeforeUnmount(() => {
   max-width: 760px;
   margin: 0 auto;
   overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   background: var(--fondo);
 }
-.pagina-conversacion--administracion { max-width: 1280px; margin-block: 18px; border: 1px solid var(--borde); border-radius: 20px; box-shadow: var(--sombra-suave); }
-.contenido-conversacion{min-height:100%;height:auto}.contenido-conversacion--administracion{display:grid;grid-template-columns:minmax(0,1fr) minmax(310px,350px);overflow:hidden}
-.columna-chat{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:var(--fondo)}
+.pagina-conversacion--administracion {
+  max-width: 1280px;
+  margin-block: 18px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  box-shadow: var(--sombra-suave);
+}
+.contenido-conversacion {
+  height: 100%;
+  min-height: 0;
+}
+.contenido-conversacion--administracion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 350px);
+  overflow: hidden;
+}
+.columna-chat {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--fondo);
+}
 .cabecera-chat {
   display: flex;
   gap: 10px;
@@ -217,11 +314,10 @@ onBeforeUnmount(() => {
   background: var(--fondo-secundario);
 }
 .compositor-chat {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -235,6 +331,27 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
-@media(max-width:900px){.contenido-conversacion--administracion{grid-template-columns:minmax(0,1fr) 310px}}
-@media(max-width:760px){.pagina-conversacion--administracion{margin-block:0;border:0;border-radius:0;box-shadow:none}.contenido-conversacion--administracion{display:block;overflow-y:auto}.contenido-conversacion--administracion .columna-chat{height:calc(100dvh - 72px)}.contenido-conversacion--administracion>.panel-operacion{border-top:1px solid var(--borde)}}
+@media (max-width: 900px) {
+  .contenido-conversacion--administracion {
+    grid-template-columns: minmax(0, 1fr) 310px;
+  }
+}
+@media (max-width: 760px) {
+  .pagina-conversacion--administracion {
+    margin-block: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .contenido-conversacion--administracion {
+    display: block;
+    overflow-y: auto;
+  }
+  .contenido-conversacion--administracion .columna-chat {
+    height: calc(100dvh - 72px);
+  }
+  .contenido-conversacion--administracion > .panel-operacion {
+    border-top: 1px solid var(--borde);
+  }
+}
 </style>

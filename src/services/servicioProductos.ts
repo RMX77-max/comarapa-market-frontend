@@ -30,9 +30,14 @@ function crearFormulario(datos: DatosFormularioProducto, metodo?: 'PUT'): FormDa
   if (metodo) formulario.append('_method', metodo);
   formulario.append('titulo', datos.titulo);
   formulario.append('precio', String(datos.precio));
+  formulario.append('precio_minimo', String(datos.precio_minimo));
   formulario.append('categoria_id', String(datos.categoria_id));
   formulario.append('descripcion', datos.descripcion);
   formulario.append('ubicacion', datos.ubicacion);
+  formulario.append('direccion_recoleccion', datos.direccion_recoleccion);
+  if (datos.ubicacion_recoleccion_url) {
+    formulario.append('ubicacion_recoleccion_url', datos.ubicacion_recoleccion_url);
+  }
   datos.imagenes?.forEach((imagen) => formulario.append('imagenes[]', imagen));
   return formulario;
 }

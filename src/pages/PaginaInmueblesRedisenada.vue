@@ -147,9 +147,9 @@
               :rules="[(v) => v?.length > 0 || 'Agrega al menos una fotografía']"
               ><template #prepend><q-icon name="add_photo_alternate" /></template></q-file
             ><q-banner class="ancho aviso-revision"
-              ><q-icon name="verified_user" /> Nuestro equipo revisará la información y definirá el
-              precio público antes de mostrarla.</q-banner
-            ><q-btn
+              ><q-icon name="verified_user" /> {{ condicionServicio }}</q-banner
+            ><q-checkbox v-model="aceptaCondiciones" class="ancho" label="Acepto esta condición si la operación se concreta" color="primary" keep-color
+            /><q-btn
               class="ancho"
               type="submit"
               color="primary"
@@ -187,6 +187,7 @@ const auth = useTiendaAutenticacion(),
   operacion = ref('venta'),
   precio = ref<number | null>(null),
   descripcion = ref(''),
+  aceptaCondiciones = ref(false),
   imagenes = ref<File[]>([]);
 const filtros = [
     { label: 'Todos', value: 'todos' },
@@ -203,6 +204,7 @@ const filtros = [
     { label: 'Otro', value: 'otro' },
   ],
   operaciones = filtros.slice(1),
+  condicionServicio = computed(() => operacion.value === 'alquiler' ? 'Si se alquila mediante la plataforma, el servicio cuesta Bs 100.' : operacion.value === 'venta' ? 'Si se vende mediante la plataforma, el servicio es del 3 % del precio final.' : 'Nuestro equipo revisará la publicación antes de mostrarla.'),
   filtrados = computed(() =>
     filtro.value === 'todos'
       ? inmuebles.value
@@ -249,7 +251,7 @@ async function cargar() {
   }
 }
 async function publicar() {
-  if (!precio.value) return;
+  if (!precio.value || !aceptaCondiciones.value) { q.notify({type:'warning',message:'Debes aceptar la condición del servicio.'}); return; }
   const f = new FormData();
   f.append('titulo', titulo.value);
   f.append('ciudad', ciudad.value);
@@ -258,6 +260,7 @@ async function publicar() {
   f.append('tipo_operacion', operacion.value);
   f.append('precio_solicitado', String(precio.value));
   f.append('descripcion', descripcion.value);
+  f.append('acepta_condiciones', '1');
   imagenes.value.slice(0, 8).forEach((x) => f.append('imagenes[]', x));
   enviando.value = true;
   try {
@@ -266,6 +269,7 @@ async function publicar() {
     titulo.value = '';
     descripcion.value = '';
     imagenes.value = [];
+    aceptaCondiciones.value = false;
     q.notify({ type: 'positive', message: 'Inmueble enviado para revisión.' });
     await cargar();
   } catch (e) {

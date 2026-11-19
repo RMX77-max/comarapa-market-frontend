@@ -53,7 +53,7 @@
         <q-card-actions align="right"><q-btn flat no-caps label="Cancelar" v-close-popup /><q-btn unelevated no-caps color="primary" label="Guardar decisión" :disable="!motivo.trim()" :loading="guardando" @click="guardarConMotivo" /></q-card-actions>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="dialogoPrecios"><q-card class="dialogo-moderacion"><q-card-section><h3>Gestión de precios</h3><p>La propuesta del vendedor es Bs {{productoSeleccionado?.precio_solicitado ?? productoSeleccionado?.precio}}.</p></q-card-section><q-card-section class="column q-gutter-md"><q-input v-model.number="precioPublico" outlined type="number" prefix="Bs" label="Precio público"/><q-input v-model.number="precioMinimo" outlined type="number" prefix="Bs" label="Precio mínimo autorizado (interno)"/><q-input v-model.number="comision" outlined type="number" prefix="Bs" label="Comisión o margen (interno)"/><q-input v-model.number="precioFinal" outlined type="number" prefix="Bs" label="Precio final acordado (opcional)"/></q-card-section><q-card-actions align="right"><q-btn flat label="Cancelar" v-close-popup/><q-btn color="primary" label="Guardar precios" unelevated :loading="guardando" @click="guardarPrecios"/></q-card-actions></q-card></q-dialog>
+    <q-dialog v-model="dialogoPrecios"><q-card class="dialogo-moderacion"><q-card-section><h3>Rango de negociación</h3><p>El precio mínimo es privado y solo lo ve el equipo administrativo.</p></q-card-section><q-card-section class="column q-gutter-md"><q-input v-model.number="precioPublico" outlined type="number" prefix="Bs" label="Precio publicado"/><q-input v-model.number="precioMinimo" outlined type="number" prefix="Bs" label="Precio mínimo"/></q-card-section><q-card-actions align="right"><q-btn flat label="Cancelar" v-close-popup/><q-btn color="primary" label="Guardar" unelevated :loading="guardando" @click="guardarPrecios"/></q-card-actions></q-card></q-dialog>
   </q-page>
 </template>
 
@@ -81,7 +81,7 @@ const dialogoMotivo = ref(false);
 const motivo = ref('');
 const productoSeleccionado = ref<Producto | null>(null);
 const decision = ref<Decision>('rechazada');
-const dialogoPrecios=ref(false),precioPublico=ref<number|null>(null),precioMinimo=ref<number|null>(null),comision=ref<number|null>(null),precioFinal=ref<number|null>(null);
+const dialogoPrecios=ref(false),precioPublico=ref<number|null>(null),precioMinimo=ref<number|null>(null);
 const opcionesEstado = [
   { label: 'Todas', value: '' }, { label: 'Pendientes', value: 'pendiente' },
   { label: 'Aprobadas', value: 'aprobada' }, { label: 'Rechazadas', value: 'rechazada' },
@@ -102,8 +102,8 @@ async function cargar(): Promise<void> {
 }
 function reiniciarYCargar(): void { pagina.value = 1; void cargar(); }
 function abrirMotivo(producto: Producto, nuevaDecision: Decision): void { productoSeleccionado.value = producto; decision.value = nuevaDecision; motivo.value = ''; dialogoMotivo.value = true; }
-function abrirPrecios(producto:Producto):void{productoSeleccionado.value=producto;precioPublico.value=producto.precio;precioMinimo.value=producto.precio_minimo??null;comision.value=producto.comision??null;precioFinal.value=producto.precio_final??null;dialogoPrecios.value=true;}
-async function guardarPrecios():Promise<void>{if(!productoSeleccionado.value||!precioPublico.value)return;guardando.value=true;try{await actualizarPreciosPublicacion(productoSeleccionado.value.id,{precio_publico:precioPublico.value,precio_minimo:precioMinimo.value,comision:comision.value,precio_final:precioFinal.value});dialogoPrecios.value=false;q.notify({type:'positive',message:'Precios actualizados.'});await cargar()}catch(e){q.notify({type:'negative',message:obtenerMensajeError(e)})}finally{guardando.value=false}}
+function abrirPrecios(producto:Producto):void{productoSeleccionado.value=producto;precioPublico.value=producto.precio;precioMinimo.value=producto.precio_minimo??null;dialogoPrecios.value=true;}
+async function guardarPrecios():Promise<void>{if(!productoSeleccionado.value||!precioPublico.value||!precioMinimo.value)return;guardando.value=true;try{await actualizarPreciosPublicacion(productoSeleccionado.value.id,{precio_publico:precioPublico.value,precio_minimo:precioMinimo.value});dialogoPrecios.value=false;q.notify({type:'positive',message:'Precios actualizados.'});await cargar()}catch(e){q.notify({type:'negative',message:obtenerMensajeError(e)})}finally{guardando.value=false}}
 async function confirmar(producto: Producto, nuevaDecision: Decision): Promise<void> { await ejecutarModeracion(producto, nuevaDecision); }
 async function guardarConMotivo(): Promise<void> { if (productoSeleccionado.value && motivo.value.trim()) await ejecutarModeracion(productoSeleccionado.value, decision.value, motivo.value.trim()); }
 async function ejecutarModeracion(producto: Producto, nuevaDecision: Decision, nuevoMotivo?: string): Promise<void> {

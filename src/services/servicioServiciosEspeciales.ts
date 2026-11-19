@@ -35,6 +35,12 @@ export interface Inmueble {
   imagenes: string[];
   estado: string;
   motivo_revision: string | null;
+  condicion_servicio?: string;
+  porcentaje_servicio_venta?: number;
+  cargo_servicio_alquiler?: number;
+  resultado_cierre?: string | null;
+  precio_cierre?: number | null;
+  monto_servicio_cobrado?: number | null;
   usuario?: { name: string; email: string };
 }
 export async function crearSolicitudProducto(

@@ -36,7 +36,10 @@ export async function obtenerConversacion(
 }> {
   const respuesta = await servicioApi.get<
     RespuestaApi<{ conversacion: Conversacion; mensajes: Mensaje[]; paginacion: Paginacion }>
-  >(`/conversaciones/${id}`, { params: { page } });
+  >(`/conversaciones/${id}`, {
+    params: { page, actualizacion: Date.now() },
+    headers: { 'Cache-Control': 'no-cache' },
+  });
   return respuesta.data.datos;
 }
 

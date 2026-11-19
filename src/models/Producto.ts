@@ -10,8 +10,8 @@ export interface Producto {
   precio: number;
   precio_solicitado?: number | null;
   precio_minimo?: number | null;
-  comision?: number | null;
-  precio_final?: number | null;
+  direccion_recoleccion?: string | null;
+  ubicacion_recoleccion_url?: string | null;
   descripcion: string;
   ubicacion: string;
   url_imagen: string | null;
