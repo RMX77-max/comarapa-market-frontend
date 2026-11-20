@@ -21,6 +21,10 @@
           </div>
         </div>
         <p><q-icon name="place" /> {{ conversacion.producto.ubicacion }}</p>
+        <p v-if="conversacion.producto.estado_producto" class="estado-producto">
+          <q-icon name="verified" />
+          {{ formatearEstadoProducto(conversacion.producto.estado_producto) }}
+        </p>
         <div class="recojo-producto">
           <small>REFERENCIAS DE RECOJO</small>
           <b>{{ conversacion.producto.direccion_recoleccion || 'Sin referencias registradas' }}</b>
@@ -426,6 +430,7 @@ import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { Conversacion } from 'src/models/Conversacion';
 import { obtenerMensajeError } from 'src/services/servicioApi';
+import { formatearEstadoProducto } from 'src/utils/estadoProducto';
 import {
   actualizarOperacion,
   crearOperacionDesdeConversacion,
@@ -727,6 +732,10 @@ watch(
   margin: 3px 0 0;
   color: var(--texto-secundario);
   font-size: 0.72rem;
+}
+.producto-operacion .estado-producto {
+  color: var(--verde-principal);
+  font-weight: 700;
 }
 .precios-producto {
   display: grid;

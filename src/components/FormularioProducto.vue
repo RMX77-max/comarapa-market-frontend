@@ -74,6 +74,19 @@
       />
     </div>
     <selector-categoria v-model="categoriaId" :opciones="categorias" />
+    <q-select
+      v-model="estadoProducto"
+      class="campo-formulario"
+      label="Estado actual del producto"
+      outlined
+      emit-value
+      map-options
+      :options="opcionesEstadoProducto"
+      lazy-rules
+      :rules="[(v) => Number(v) >= 1 || 'Selecciona el estado actual del producto.']"
+    >
+      <template #prepend><q-icon name="verified" /></template>
+    </q-select>
     <q-input
       v-model="descripcion"
       class="campo-formulario"
@@ -143,6 +156,7 @@
 import { computed, ref } from 'vue';
 import SelectorCategoria from './SelectorCategoria.vue';
 import SelectorUbicacionMapa from './SelectorUbicacionMapa.vue';
+import { opcionesEstadoProducto } from 'src/utils/estadoProducto';
 import type { Categoria } from 'src/models/Categoria';
 import type { Producto } from 'src/models/Producto';
 import type { DatosFormularioProducto } from 'src/models/FormularioProducto';
@@ -167,6 +181,7 @@ const precio = ref<number | null>(propiedades.producto?.precio ?? null);
 const precioMinimo = ref<number | null>(propiedades.producto?.precio_minimo ?? null);
 const categoriaId = ref<number | null>(propiedades.producto?.categoria.id ?? null);
 const descripcion = ref(propiedades.producto?.descripcion ?? '');
+const estadoProducto = ref<number | null>(propiedades.producto?.estado_producto ?? null);
 const ubicacion = ref(propiedades.producto?.ubicacion ?? 'Comarapa');
 const direccionRecoleccion = ref(propiedades.producto?.direccion_recoleccion ?? '');
 const ubicacionRecoleccionUrl = ref(propiedades.producto?.ubicacion_recoleccion_url ?? '');
@@ -248,7 +263,7 @@ function seleccionarImagen(evento: Event): void {
 }
 
 function guardar(): void {
-  if (!precio.value || !precioMinimo.value || !categoriaId.value) return;
+  if (!precio.value || !precioMinimo.value || !categoriaId.value || !estadoProducto.value) return;
   if (!propiedades.producto && imagenes.value.length === 0) {
     errorImagen.value = 'Debes agregar al menos una imagen del producto.';
     return;
@@ -264,6 +279,7 @@ function guardar(): void {
     precio_minimo: precioMinimo.value,
     categoria_id: categoriaId.value,
     descripcion: descripcion.value.trim(),
+    estado_producto: estadoProducto.value,
     ubicacion: ubicacion.value.trim(),
     direccion_recoleccion: direccionRecoleccion.value.trim(),
     ubicacion_recoleccion_url: ubicacionRecoleccionUrl.value.trim(),

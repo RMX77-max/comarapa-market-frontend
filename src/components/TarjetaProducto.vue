@@ -31,6 +31,9 @@
     <q-card-section class="tarjeta-producto__contenido">
       <p>{{ formatearPrecio(producto.precio) }}</p>
       <h3>{{ producto.titulo }}</h3>
+      <span v-if="producto.estado_producto" class="tarjeta-producto__condicion">
+        <q-icon name="verified" /> {{ formatearEstadoProducto(producto.estado_producto) }}
+      </span>
       <div class="tarjeta-producto__meta">
         <span><q-icon name="place" /> {{ producto.ubicacion }}</span>
         <span>· {{ formatearFechaCorta(producto.fecha_publicacion) }}</span>
@@ -46,6 +49,7 @@ import ImagenProductoVacia from './ImagenProductoVacia.vue';
 import type { Producto } from 'src/models/Producto';
 import { formatearPrecio } from 'src/utils/formatearPrecio';
 import { formatearFechaCorta } from 'src/utils/formatearFecha';
+import { formatearEstadoProducto } from 'src/utils/estadoProducto';
 
 const propiedades = withDefaults(
   defineProps<{ producto: Producto; mostrarEstado?: boolean; mostrarTipo?: boolean }>(),
@@ -168,6 +172,17 @@ defineEmits<{ abrir: [producto: Producto] }>();
       overflow: hidden;
       text-overflow: ellipsis;
     }
+  }
+
+  &__condicion {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    width: fit-content;
+    margin-top: 5px;
+    color: var(--primario);
+    font-size: 0.72rem;
+    font-weight: 700;
   }
 }
 </style>

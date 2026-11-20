@@ -9,6 +9,7 @@ export interface ProductoConversacion {
   estado: EstadoProducto;
   precio: number;
   precio_minimo?: number | null;
+  estado_producto?: number | null;
   descripcion: string;
   ubicacion: string;
   direccion_recoleccion?: string | null;

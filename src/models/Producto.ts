@@ -13,6 +13,7 @@ export interface Producto {
   direccion_recoleccion?: string | null;
   ubicacion_recoleccion_url?: string | null;
   descripcion: string;
+  estado_producto?: number | null;
   ubicacion: string;
   url_imagen: string | null;
   imagenes?: string[];

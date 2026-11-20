@@ -33,6 +33,7 @@ function crearFormulario(datos: DatosFormularioProducto, metodo?: 'PUT'): FormDa
   formulario.append('precio_minimo', String(datos.precio_minimo));
   formulario.append('categoria_id', String(datos.categoria_id));
   formulario.append('descripcion', datos.descripcion);
+  formulario.append('estado_producto', String(datos.estado_producto));
   formulario.append('ubicacion', datos.ubicacion);
   formulario.append('direccion_recoleccion', datos.direccion_recoleccion);
   if (datos.ubicacion_recoleccion_url) {

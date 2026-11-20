@@ -298,6 +298,7 @@ onMounted(async () => {
   background: #edf3eb;
 }
 .portada-perfil img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -324,11 +325,24 @@ onMounted(async () => {
 }
 .avatar-superpuesto {
   position: absolute;
+  overflow: hidden;
   top: -54px;
   left: clamp(18px, 4vw, 30px);
+  box-sizing: border-box;
   border: 5px solid #fff;
   border-radius: 50%;
   box-shadow: 0 6px 18px rgba(23, 43, 77, 0.18);
+}
+.avatar-superpuesto :deep(.q-avatar__content),
+.avatar-superpuesto :deep(.q-img),
+.avatar-superpuesto :deep(.q-img__container),
+.avatar-superpuesto :deep(img) {
+  width: 100%;
+  height: 100%;
+}
+.avatar-superpuesto :deep(img) {
+  display: block;
+  object-fit: cover;
 }
 .nombre-verificado {
   display: flex;
@@ -453,13 +467,16 @@ onMounted(async () => {
   .portada-perfil {
     height: 180px;
   }
+  .portada-perfil img {
+    object-position: center top;
+  }
   .contenido-perfil {
     padding-top: 58px;
   }
   .avatar-superpuesto {
-    width: 96px !important;
-    height: 96px !important;
+    font-size: 96px !important;
     top: -50px;
+    left: 18px;
   }
   .biografia-perfil {
     font-size: 0.92rem;

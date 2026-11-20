@@ -44,6 +44,13 @@
           <span class="detalle-producto__categoria">{{ producto.categoria.nombre }}</span>
           <h1>{{ producto.titulo }}</h1>
           <div class="detalle-producto__precio">{{ formatearPrecio(producto.precio) }}</div>
+          <div v-if="producto.estado_producto" class="detalle-producto__estado">
+            <q-icon name="verified" />
+            <div>
+              <small>Estado del producto</small
+              ><strong>{{ formatearEstadoProducto(producto.estado_producto) }}</strong>
+            </div>
+          </div>
           <p>{{ producto.descripcion }}</p>
           <div class="detalle-producto__ubicacion">
             <q-icon name="place" /> {{ producto.ubicacion }}
@@ -148,6 +155,7 @@ import ImagenProductoVacia from 'components/ImagenProductoVacia.vue';
 import TarjetaProducto from 'components/TarjetaProducto.vue';
 import type { Producto } from 'src/models/Producto';
 import { formatearPrecio } from 'src/utils/formatearPrecio';
+import { formatearEstadoProducto } from 'src/utils/estadoProducto';
 import { useTiendaProductos } from 'src/stores/tiendaProductos';
 import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 import { crearConversacion, enviarMensaje } from 'src/services/servicioMensajes';
@@ -314,6 +322,28 @@ watch(() => ruta.params.id, cargarDetalle);
   }
   &__precio {
     font-size: 1.6rem;
+  }
+  &__estado {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: fit-content;
+    margin-top: 12px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: var(--verde-suave, #e9f6ed);
+    color: var(--verde-principal);
+  }
+  &__estado .q-icon {
+    font-size: 1.35rem;
+  }
+  &__estado small,
+  &__estado strong {
+    display: block;
+  }
+  &__estado small {
+    color: var(--texto-secundario);
+    font-size: 0.72rem;
   }
   &__ubicacion {
     margin: 16px 0;
