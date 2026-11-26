@@ -1,0 +1,14 @@
+{
+  "appId": "com.comarapamarket.app",
+  "appName": "Comarapa Market",
+  "webDir": "www",
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
+  }
+}

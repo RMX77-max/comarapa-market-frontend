@@ -38,6 +38,16 @@
             :src="conversacion.producto.url_imagen"
             :alt="conversacion.producto.titulo"
           />
+          <q-btn
+            v-if="enAdministracion && q.screen.lt.md"
+            class="cabecera-chat__operacion"
+            color="primary"
+            round
+            unelevated
+            icon="receipt_long"
+            aria-label="Ver producto y operación"
+            @click="mostrarPanelMovil = true"
+          />
         </header>
 
         <main ref="contenedorMensajes" class="mensajes-chat" aria-live="polite">
@@ -95,12 +105,30 @@
         </q-form>
       </section>
       <panel-operacion-venta
-        v-if="enAdministracion"
+        v-if="enAdministracion && !q.screen.lt.md"
         :conversacion="conversacion"
         :es-administrador="true"
         :ubicacion-compartida="ultimaUbicacionCompartida"
         @actualizada="recargar"
       />
+
+      <q-dialog v-if="enAdministracion" v-model="mostrarPanelMovil" position="bottom">
+        <q-card class="modal-operacion-movil">
+          <q-card-section class="modal-operacion-movil__cabecera">
+            <div>
+              <strong>Producto y operación</strong>
+              <small>Información y acciones de la venta</small>
+            </div>
+            <q-btn v-close-popup flat round dense icon="close" aria-label="Cerrar" />
+          </q-card-section>
+          <panel-operacion-venta
+            :conversacion="conversacion"
+            :es-administrador="true"
+            :ubicacion-compartida="ultimaUbicacionCompartida"
+            @actualizada="recargar"
+          />
+        </q-card>
+      </q-dialog>
     </div>
   </q-page>
 </template>
@@ -115,6 +143,7 @@ import PanelOperacionVenta from 'components/PanelOperacionVenta.vue';
 import { useTiendaMensajes } from 'src/stores/tiendaMensajes';
 import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 import { obtenerMensajeError } from 'src/services/servicioApi';
+import { obtenerCoordenadasDispositivo } from 'src/services/servicioGeolocalizacion';
 import { useQuasar } from 'quasar';
 
 const ruta = useRoute();
@@ -128,9 +157,10 @@ const usuario = computed(() => autenticacion.usuario);
 const mensajes = computed(() => tienda.mensajes);
 const mensaje = ref('');
 const compartiendoUbicacion = ref(false);
+const mostrarPanelMovil = ref(false);
 const contenedorMensajes = ref<HTMLElement | null>(null);
 const paginaElemento = ref<{ $el?: HTMLElement } | HTMLElement | null>(null);
-const alturaDisponible = ref('calc(100dvh - 72px)');
+const alturaDisponible = ref('calc(100dvh - 58px)');
 const enAdministracion = computed(() => ruta.path.startsWith('/administracion/'));
 let temporizadorMensajes: ReturnType<typeof setInterval> | undefined;
 let actualizandoMensajes = false;
@@ -178,33 +208,21 @@ async function enviarMensaje(): Promise<void> {
   }
 }
 
-function compartirUbicacion(): void {
-  if (!navigator.geolocation) {
-    q.notify({ type: 'negative', message: 'Este dispositivo no permite obtener la ubicación.' });
-    return;
-  }
+async function compartirUbicacion(): Promise<void> {
   compartiendoUbicacion.value = true;
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => {
-      const url = `https://www.google.com/maps?q=${coords.latitude.toFixed(7)},${coords.longitude.toFixed(7)}`;
-      mensaje.value = `📍 Mi ubicación actual\n${url}`;
-      compartiendoUbicacion.value = false;
-      void enviarMensaje();
-    },
-    (error) => {
-      const textos: Record<number, string> = {
-        1: 'Debes permitir el acceso a tu ubicación.',
-        2: 'Activa el GPS e inténtalo nuevamente.',
-        3: 'La ubicación tardó demasiado. Inténtalo otra vez.',
-      };
-      q.notify({
-        type: 'negative',
-        message: textos[error.code] ?? 'No pudimos obtener tu ubicación.',
-      });
-      compartiendoUbicacion.value = false;
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-  );
+  try {
+    const coordenadas = await obtenerCoordenadasDispositivo();
+    const url = `https://www.google.com/maps?q=${coordenadas.latitud.toFixed(7)},${coordenadas.longitud.toFixed(7)}`;
+    mensaje.value = `📍 Mi ubicación actual\n${url}`;
+    await enviarMensaje();
+  } catch (error) {
+    q.notify({
+      type: 'negative',
+      message: error instanceof Error ? error.message : 'No pudimos obtener tu ubicación.',
+    });
+  } finally {
+    compartiendoUbicacion.value = false;
+  }
 }
 
 async function recargar(): Promise<void> {
@@ -243,8 +261,8 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .pagina-conversacion {
-  height: calc(100vh - 72px);
-  height: calc(100dvh - 72px);
+  height: calc(100vh - 58px);
+  height: calc(100dvh - 58px);
   min-height: 0 !important;
   max-width: 760px;
   margin: 0 auto;
@@ -293,6 +311,9 @@ onBeforeUnmount(() => {
   height: 52px;
   margin-left: auto;
   border-radius: 10px;
+}
+.cabecera-chat__operacion {
+  flex: 0 0 auto;
 }
 .cabecera-chat span {
   max-width: 220px;
@@ -345,13 +366,33 @@ onBeforeUnmount(() => {
   }
   .contenido-conversacion--administracion {
     display: block;
-    overflow-y: auto;
+    height: 100%;
+    overflow: hidden;
   }
   .contenido-conversacion--administracion .columna-chat {
-    height: calc(100dvh - 72px);
+    height: 100%;
   }
-  .contenido-conversacion--administracion > .panel-operacion {
-    border-top: 1px solid var(--borde);
-  }
+  .cabecera-chat__producto { width: 42px; height: 42px; }
 }
+
+.modal-operacion-movil {
+  width: 100%;
+  max-width: 100% !important;
+  height: min(90dvh, 760px);
+  overflow: hidden;
+  border-radius: 22px 22px 0 0;
+  background: var(--fondo-secundario);
+}
+.modal-operacion-movil__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borde);
+  background: var(--fondo);
+}
+.modal-operacion-movil__cabecera div { display: grid; }
+.modal-operacion-movil__cabecera small { color: var(--texto-secundario); font-size: .72rem; }
+.modal-operacion-movil :deep(.panel-operacion) { height: calc(100% - 62px); }
 </style>

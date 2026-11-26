@@ -143,6 +143,13 @@ body.body--dark .pagina-inicio .acciones-movil-fijas .q-icon {
   background: var(--fondo);
 }
 
+/* Los colores utilitarios de Quasar son fijos. En superficies oscuras los
+   botones de texto y contorno necesitan una variante clara de la marca. */
+.body--dark .q-btn--outline.text-primary,
+.body--dark .q-btn--flat.text-primary {
+  color: var(--primario-claro) !important;
+}
+
 .body--dark .q-field__control,
 .body--dark .q-field__native,
 .body--dark .q-field__input,

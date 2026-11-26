@@ -51,8 +51,16 @@ async function abrir(notificacion: Notificacion): Promise<void> {
 async function leerTodas(): Promise<void> { await marcarTodasLeidas(); await cargar(); }
 function icono(tipo: string): string { return tipo === 'publicacion_pendiente' ? 'pending_actions' : 'campaign'; }
 
-onMounted(() => { void cargar(); temporizador = setInterval(() => void cargar(), 30000); });
-onBeforeUnmount(() => { if (temporizador) clearInterval(temporizador); });
+function notificacionRecibida(): void { void cargar(); }
+onMounted(() => {
+  void cargar();
+  temporizador = setInterval(() => void cargar(), 30000);
+  window.addEventListener('comarapa-market:notificacion-recibida', notificacionRecibida);
+});
+onBeforeUnmount(() => {
+  if (temporizador) clearInterval(temporizador);
+  window.removeEventListener('comarapa-market:notificacion-recibida', notificacionRecibida);
+});
 </script>
 
 <style scoped lang="scss">

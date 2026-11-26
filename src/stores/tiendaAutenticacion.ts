@@ -1,30 +1,17 @@
 import { defineStore } from 'pinia';
 import type { Usuario } from 'src/models/Usuario';
-import { CLAVE_SESION } from 'src/services/servicioApi';
-
-interface SesionPersistida {
-  usuario: Usuario;
-  token: string;
-}
-
-function leerSesion(): SesionPersistida | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    // Elimina sesiones antiguas que se compartían entre ventanas.
-    window.localStorage.removeItem(CLAVE_SESION);
-    const valor = window.sessionStorage.getItem(CLAVE_SESION);
-    return valor ? (JSON.parse(valor) as SesionPersistida) : null;
-  } catch {
-    window.sessionStorage.removeItem(CLAVE_SESION);
-    return null;
-  }
-}
+import {
+  cargarSesionPersistida,
+  eliminarSesionPersistida,
+  guardarSesionPersistida,
+} from 'src/services/servicioAlmacenamientoSesion';
 
 export const useTiendaAutenticacion = defineStore('autenticacion', {
-  state: () => {
-    const sesion = leerSesion();
-    return { usuario: sesion?.usuario ?? (null as Usuario | null), token: sesion?.token ?? '' };
-  },
+  state: () => ({
+    usuario: null as Usuario | null,
+    token: '',
+    sesionInicializada: false,
+  }),
   getters: {
     estaAutenticado: (estado) => Boolean(estado.token),
     esAdministrador: (estado) =>
@@ -32,6 +19,13 @@ export const useTiendaAutenticacion = defineStore('autenticacion', {
     esSuperadministrador: (estado) => estado.usuario?.rol === 'superadministrador',
   },
   actions: {
+    async inicializarSesion() {
+      if (this.sesionInicializada) return;
+      const sesion = await cargarSesionPersistida();
+      this.usuario = sesion?.usuario ?? null;
+      this.token = sesion?.token ?? '';
+      this.sesionInicializada = true;
+    },
     establecerSesion(usuario: Usuario, token: string) {
       this.usuario = usuario;
       this.token = token;
@@ -44,17 +38,11 @@ export const useTiendaAutenticacion = defineStore('autenticacion', {
     limpiarSesion() {
       this.usuario = null;
       this.token = '';
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.removeItem(CLAVE_SESION);
-        window.localStorage.removeItem(CLAVE_SESION);
-      }
+      eliminarSesionPersistida();
     },
     persistir() {
-      if (typeof window !== 'undefined' && this.usuario && this.token) {
-        window.sessionStorage.setItem(
-          CLAVE_SESION,
-          JSON.stringify({ usuario: this.usuario, token: this.token }),
-        );
+      if (this.usuario && this.token) {
+        guardarSesionPersistida({ usuario: this.usuario, token: this.token });
       }
     },
   },

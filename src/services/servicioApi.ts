@@ -1,11 +1,18 @@
 import axios from 'axios';
 import type { AxiosError } from 'axios';
-
-export const CLAVE_SESION = 'comarapa_market_sesion';
+import { Capacitor } from '@capacitor/core';
+import {
+  eliminarSesionPersistida,
+  obtenerTokenSesion,
+} from 'src/services/servicioAlmacenamientoSesion';
 
 const URL_API =
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+  (import.meta.env.DEV
+    ? 'http://127.0.0.1:8000/api/v1'
+    : Capacitor.isNativePlatform()
+      ? 'https://api.comarapamarket.com/api/v1'
+      : '/api/v1');
 
 export const servicioApi = axios.create({
   baseURL: URL_API,
@@ -56,16 +63,8 @@ function normalizarUrlsArchivos(valor: unknown): unknown {
 }
 
 servicioApi.interceptors.request.use((configuracion) => {
-  if (typeof window === 'undefined') return configuracion;
-  const sesion = window.sessionStorage.getItem(CLAVE_SESION);
-  if (!sesion) return configuracion;
-
-  try {
-    const { token } = JSON.parse(sesion) as { token?: string };
-    if (token) configuracion.headers.Authorization = `Bearer ${token}`;
-  } catch {
-    window.sessionStorage.removeItem(CLAVE_SESION);
-  }
+  const token = obtenerTokenSesion();
+  if (token) configuracion.headers.Authorization = `Bearer ${token}`;
   return configuracion;
 });
 
@@ -76,8 +75,7 @@ servicioApi.interceptors.response.use(
   },
   (error: AxiosError) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      window.sessionStorage.removeItem(CLAVE_SESION);
-      window.localStorage.removeItem(CLAVE_SESION);
+      eliminarSesionPersistida();
       window.dispatchEvent(new CustomEvent('comarapa-market:sesion-expirada'));
     }
     return Promise.reject(error);

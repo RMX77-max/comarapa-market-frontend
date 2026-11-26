@@ -17,7 +17,10 @@ import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
  * with the Router instance.
  */
 
-export default defineRouter(function ({ store }) {
+export default defineRouter(async function ({ store }) {
+  const autenticacion = useTiendaAutenticacion(store);
+  await autenticacion.inicializarSesion();
+
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
@@ -35,7 +38,6 @@ export default defineRouter(function ({ store }) {
   });
 
   Router.beforeEach((to) => {
-    const autenticacion = useTiendaAutenticacion(store);
     const estaAutenticado = autenticacion.estaAutenticado;
 
     if (to.meta.requiereAutenticacion && !estaAutenticado) {

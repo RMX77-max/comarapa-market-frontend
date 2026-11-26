@@ -136,6 +136,31 @@ watch(() => ruta.name, actualizarEncabezado);
   }
 }
 
+@media (max-width: 899px) {
+  .encabezado-principal {
+    &__contenido {
+      min-height: 58px;
+      padding: 2px 12px;
+    }
+
+    :deep(.marca-comarapa__logo) {
+      width: 166px;
+      height: 40px;
+    }
+
+    &--compacto {
+      .encabezado-principal__contenido {
+        min-height: 58px;
+      }
+
+      :deep(.marca-comarapa__logo) {
+        width: 154px;
+        height: 37px;
+      }
+    }
+  }
+}
+
 .navegacion-escritorio {
   display: none;
   gap: 4px;

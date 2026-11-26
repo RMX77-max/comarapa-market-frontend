@@ -163,6 +163,9 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
     capacitor: {
       hideSplashscreen: true,
+      // Android ya coloca el WebView debajo de la barra de estado. Evita que
+      // Quasar vuelva a sumar el safe-area y duplique la altura del header.
+      androidStatusBarPadding: false,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron

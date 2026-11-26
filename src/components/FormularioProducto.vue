@@ -160,6 +160,7 @@ import { opcionesEstadoProducto } from 'src/utils/estadoProducto';
 import type { Categoria } from 'src/models/Categoria';
 import type { Producto } from 'src/models/Producto';
 import type { DatosFormularioProducto } from 'src/models/FormularioProducto';
+import { obtenerCoordenadasDispositivo } from 'src/services/servicioGeolocalizacion';
 
 const propiedades = withDefaults(
   defineProps<{
@@ -203,32 +204,18 @@ const entradaImagen = ref<HTMLInputElement | null>(null);
 const errorImagen = ref('');
 const imagenes = ref<File[]>([]);
 
-function obtenerUbicacion(): void {
+async function obtenerUbicacion(): Promise<void> {
   errorUbicacion.value = '';
-  if (!navigator.geolocation) {
-    errorUbicacion.value = 'Este dispositivo no permite obtener la ubicación.';
-    return;
-  }
-
   obteniendoUbicacion.value = true;
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => {
-      const latitud = coords.latitude.toFixed(7);
-      const longitud = coords.longitude.toFixed(7);
-      ubicacionRecoleccionUrl.value = `https://www.google.com/maps?q=${latitud},${longitud}`;
-      obteniendoUbicacion.value = false;
-    },
-    (error) => {
-      const mensajes: Record<number, string> = {
-        1: 'Debes permitir el acceso a tu ubicación para continuar.',
-        2: 'No pudimos determinar tu ubicación. Activa el GPS e inténtalo nuevamente.',
-        3: 'La ubicación tardó demasiado. Inténtalo nuevamente en un lugar con mejor señal.',
-      };
-      errorUbicacion.value = mensajes[error.code] ?? 'No fue posible obtener tu ubicación.';
-      obteniendoUbicacion.value = false;
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-  );
+  try {
+    const coordenadas = await obtenerCoordenadasDispositivo();
+    ubicacionRecoleccionUrl.value = `https://www.google.com/maps?q=${coordenadas.latitud.toFixed(7)},${coordenadas.longitud.toFixed(7)}`;
+  } catch (error) {
+    errorUbicacion.value =
+      error instanceof Error ? error.message : 'No fue posible obtener tu ubicación.';
+  } finally {
+    obteniendoUbicacion.value = false;
+  }
 }
 
 function seleccionarImagen(evento: Event): void {

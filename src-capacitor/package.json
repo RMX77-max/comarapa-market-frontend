@@ -1,0 +1,22 @@
+{
+  "name": "comarapa-market-frontend",
+  "version": "0.0.1",
+  "description": "aplicacion market para comarapa",
+  "author": "Carlos Reyna <pinduestuar7@gmail.com>",
+  "private": true,
+  "scripts": {
+    "assets:android": "capacitor-assets generate --android --assetPath assets"
+  },
+  "dependencies": {
+    "@aparajita/capacitor-secure-storage": "^8.0.1",
+    "@capacitor/android": "^8.6.3",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/geolocation": "^8.0.0",
+    "@capacitor/push-notifications": "^8.1.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0"
+  }
+}

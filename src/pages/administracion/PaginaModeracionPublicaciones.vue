@@ -35,7 +35,7 @@
           </q-banner>
           <div class="acciones-moderacion">
             <q-btn outline no-caps color="primary" icon="payments" label="Gestionar precios" @click="abrirPrecios(producto)" />
-            <q-btn unelevated no-caps color="primary" icon="check_circle" label="Aprobar" @click="confirmar(producto, 'aprobada')" />
+            <q-btn v-if="producto.estado_moderacion !== 'aprobada'" unelevated no-caps color="primary" icon="check_circle" label="Aprobar" @click="confirmar(producto, 'aprobada')" />
             <q-btn outline no-caps color="blue-8" icon="edit_note" label="Pedir cambios" @click="abrirMotivo(producto, 'correccion')" />
             <q-btn outline no-caps color="negative" icon="cancel" label="Rechazar" @click="abrirMotivo(producto, 'rechazada')" />
             <q-btn v-if="producto.estado_moderacion === 'aprobada'" flat no-caps color="negative" icon="visibility_off" label="Ocultar" @click="abrirMotivo(producto, 'oculta')" />
@@ -140,11 +140,16 @@ onBeforeUnmount(() => { if (temporizador) clearInterval(temporizador); });
 .dialogo-moderacion h3, .dialogo-moderacion p { margin: 0; }
 .dialogo-moderacion p { margin-top: 5px; color: var(--texto-secundario); }
 @media (max-width: 650px) {
+  .pagina-moderacion { padding: 16px 14px 26px; }
   .filtros-moderacion { grid-template-columns: 1fr; }
   .cabecera-moderacion > .q-icon { display: none; }
-  .publicacion-moderacion { grid-template-columns: 105px minmax(0, 1fr); }
-  .publicacion-moderacion__imagen { min-height: 100%; }
+  .cabecera-moderacion { margin-bottom: 16px; }
+  .cabecera-moderacion h1 { font-size: 1.55rem; }
+  .publicacion-moderacion { grid-template-columns: 1fr; }
+  .publicacion-moderacion__imagen { width: 100%; height: auto; min-height: 0; aspect-ratio: 16 / 9; }
   .publicacion-moderacion__datos { padding: 13px; }
-  .acciones-moderacion .q-btn { flex: 1 1 145px; }
+  .publicacion-moderacion h2 { font-size: 1.05rem; line-height: 1.25; }
+  .acciones-moderacion { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .acciones-moderacion .q-btn { width: 100%; min-height: 42px; font-size: .76rem; }
 }
 </style>

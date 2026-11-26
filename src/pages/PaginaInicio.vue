@@ -509,11 +509,11 @@ onMounted(() => void cargar());
   .acciones-movil-fijas {
     position: sticky;
     z-index: 5;
-    top: 62px;
+    top: 58px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
-    margin: 16px -4px 0;
+    margin: 8px -4px 0;
     padding: 7px;
     border: 1px solid rgb(220 228 239 / 80%);
     border-radius: 16px;
@@ -523,7 +523,7 @@ onMounted(() => void cargar());
 
     :deep(.q-btn) {
       min-width: 0;
-      min-height: 54px;
+      min-height: 48px;
       padding: 5px 2px;
       border-radius: 11px;
       color: var(--azul-marino);

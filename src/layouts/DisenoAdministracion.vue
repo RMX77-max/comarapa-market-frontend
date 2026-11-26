@@ -196,8 +196,8 @@ async function cerrarSesion(): Promise<void> {
   box-shadow: inset 3px 0 var(--coral);
 }
 @media (max-width: 480px) {
-  .cabecera-administracion__contenido { padding-inline: 6px; }
-  .cabecera-administracion :deep(.marca-comarapa__logo) { width: 182px; height: 44px; }
+  .cabecera-administracion__contenido { min-height: 58px; padding-inline: 4px; }
+  .cabecera-administracion :deep(.marca-comarapa__logo) { width: 154px; height: 38px; }
   .cabecera-administracion__seccion { display: none; }
   .cabecera-administracion .q-chip {
     max-width: 48px;

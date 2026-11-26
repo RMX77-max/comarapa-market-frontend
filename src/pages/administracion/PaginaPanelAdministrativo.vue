@@ -628,9 +628,23 @@ onMounted(cargarResumen);
   }
 }
 @media (max-width: 700px) {
+  .pagina-panel {
+    padding: 16px 14px 24px;
+  }
   .panel-cabecera {
     align-items: stretch;
     flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .panel-cabecera h1 {
+    margin: 2px 0;
+    font-size: clamp(1.35rem, 7vw, 1.75rem);
+    line-height: 1.2;
+  }
+  .panel-cabecera p {
+    font-size: 0.86rem;
+    line-height: 1.45;
   }
   .panel-cabecera__acciones .q-btn {
     flex: 1;

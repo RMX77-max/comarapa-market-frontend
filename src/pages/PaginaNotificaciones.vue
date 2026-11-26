@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import EstadoContenido from 'components/EstadoContenido.vue';
 import type { Notificacion } from 'src/models/Notificacion';
@@ -27,7 +27,14 @@ async function cargar(): Promise<void> { cargando.value = true; error.value = ''
 async function abrir(item: Notificacion): Promise<void> { if (!item.leida) await marcarNotificacionLeida(item.id); if (item.ruta) await enrutador.push(item.ruta); else await cargar(); }
 async function leerTodas(): Promise<void> { await marcarTodasLeidas(); await cargar(); }
 function formatear(fecha: string): string { return new Intl.DateTimeFormat('es-BO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(fecha)); }
-onMounted(cargar);
+function notificacionRecibida(): void { void cargar(); }
+onMounted(() => {
+  void cargar();
+  window.addEventListener('comarapa-market:notificacion-recibida', notificacionRecibida);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('comarapa-market:notificacion-recibida', notificacionRecibida);
+});
 </script>
 
 <style scoped lang="scss">

@@ -2,6 +2,7 @@ import type { RespuestaApi } from 'src/models/Api';
 import type { Usuario } from 'src/models/Usuario';
 export { solicitarRecuperacion, restablecerContrasena } from './servicioOperaciones';
 import { servicioApi } from './servicioApi';
+import { desvincularDispositivoPush } from './servicioPush';
 
 interface DatosSesion {
   usuario: Usuario;
@@ -57,5 +58,6 @@ export async function obtenerUsuarioAutenticado(): Promise<Usuario> {
 }
 
 export async function cerrarSesion(): Promise<void> {
+  await desvincularDispositivoPush();
   await servicioApi.post('/cerrar-sesion');
 }
