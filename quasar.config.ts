@@ -85,7 +85,13 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {},
+      config: {
+        capacitor: {
+          // El WebView ya se muestra debajo de la barra de estado en Android.
+          // Evita que Quasar duplique ese espacio dentro del QHeader.
+          androidStatusBarPadding: false,
+        },
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       lang: 'es',
@@ -163,9 +169,6 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
     capacitor: {
       hideSplashscreen: true,
-      // Android ya coloca el WebView debajo de la barra de estado. Evita que
-      // Quasar vuelva a sumar el safe-area y duplique la altura del header.
-      androidStatusBarPadding: false,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron

@@ -368,6 +368,13 @@ h6,
   border-color: var(--borde);
 }
 
+// Respaldo específico para el contenedor Android. Algunos fabricantes
+// informan un safe-area superior aunque el WebView ya esté debajo de la
+// barra del sistema, lo que duplicaría la altura del encabezado.
+body.capacitor.platform-android.q-safe-area-padding {
+  --q-safe-area-inset-top: 0px;
+}
+
 .q-field__native,
 .q-field__input,
 .q-item__label {
