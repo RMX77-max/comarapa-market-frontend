@@ -20,6 +20,10 @@ export interface Producto {
   estado: EstadoProducto;
   estado_moderacion: EstadoModeracion;
   motivo_moderacion: string | null;
+  actualizacion_pendiente?: boolean;
+  campos_actualizacion?: string[];
+  valores_actualizacion?: Record<string, unknown> | null;
+  actualizacion_solicitada_en?: string | null;
   categoria: Categoria;
   vendedor: ResumenUsuario;
   fecha_publicacion: string;

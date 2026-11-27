@@ -14,20 +14,25 @@
           <div v-else class="paisaje-marca"><q-icon name="landscape" /><span>Comarapa</span></div>
         </div>
         <div class="contenido-perfil">
-          <avatar-usuario
-            class="avatar-superpuesto"
-            :nombre="usuario.nombre"
-            :url="usuario.url_foto_perfil"
-            tamano="104px"
-          />
-          <div class="identidad-perfil">
-            <div class="nombre-verificado">
-              <h1>{{ usuario.nombre }}</h1>
-              <q-icon v-if="usuario.telefono_verificado" name="verified" class="insignia-verificada"
-                ><q-tooltip>Celular verificado</q-tooltip></q-icon
-              >
+          <div class="bloque-identidad">
+            <avatar-usuario
+              class="avatar-superpuesto"
+              :nombre="usuario.nombre"
+              :url="usuario.url_foto_perfil"
+              tamano="104px"
+            />
+            <div class="identidad-perfil">
+              <div class="nombre-verificado">
+                <h1>{{ usuario.nombre }}</h1>
+                <q-icon
+                  v-if="usuario.telefono_verificado"
+                  name="verified"
+                  class="insignia-verificada"
+                  ><q-tooltip>Celular verificado</q-tooltip></q-icon
+                >
+              </div>
+              <p><q-icon name="place" /> {{ usuario.ubicacion || 'Ubicación no configurada' }}</p>
             </div>
-            <p><q-icon name="place" /> {{ usuario.ubicacion || 'Ubicación no configurada' }}</p>
           </div>
           <p class="biografia-perfil">
             {{ usuario.biografia || 'Agrega una descripción sobre ti.' }}
@@ -319,16 +324,18 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .tarjeta-perfil {
-  overflow: hidden;
+  position: relative;
   margin-top: 18px;
-  border: 1px solid #dfe5e1;
-  border-radius: 24px;
-  background: var(--fondo);
-  box-shadow: 0 10px 30px rgba(0, 70, 40, 0.09);
+  padding-bottom: 1px;
+  border-radius: 26px;
+  background: transparent;
 }
 .portada-perfil {
   height: clamp(150px, 31vw, 230px);
+  overflow: hidden;
+  border-radius: 26px 26px 18px 18px;
   background: #edf3eb;
+  box-shadow: 0 8px 24px rgba(0, 70, 40, 0.09);
 }
 .portada-perfil img {
   display: block;
@@ -354,13 +361,25 @@ onMounted(async () => {
 }
 .contenido-perfil {
   position: relative;
-  padding: 62px clamp(18px, 4vw, 30px) 24px;
+  z-index: 1;
+  margin: -28px 14px 0;
+  padding: 18px clamp(18px, 4vw, 28px) 22px;
+  border: 1px solid var(--borde);
+  border-radius: 24px;
+  background: var(--fondo);
+  box-shadow: 0 12px 30px rgba(0, 70, 40, 0.12);
+}
+.bloque-identidad {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: clamp(12px, 3vw, 18px);
+  align-items: center;
+  min-width: 0;
 }
 .avatar-superpuesto {
-  position: absolute;
   overflow: hidden;
-  top: -54px;
-  left: clamp(18px, 4vw, 30px);
+  align-self: start;
+  margin-top: -58px;
   box-sizing: border-box;
   border: 5px solid #fff;
   border-radius: 50%;
@@ -384,6 +403,7 @@ onMounted(async () => {
   gap: 8px;
 }
 .nombre-verificado h1 {
+  min-width: 0;
   overflow-wrap: anywhere;
   margin: 0;
   color: var(--texto-principal);
@@ -396,19 +416,25 @@ onMounted(async () => {
   font-size: 29px;
 }
 .identidad-perfil > p {
-  display: flex;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
   align-items: center;
   gap: 4px;
-  margin: 7px 0 0;
-  color: #64726c;
-  font-size: 0.95rem;
+  margin: 8px 0 0;
+  padding: 5px 10px 5px 7px;
+  border-radius: 999px;
+  color: var(--texto-secundario);
+  background: var(--verde-suave, #e9f6ed);
+  font-size: 0.86rem;
+  line-height: 1.2;
 }
 .identidad-perfil > p .q-icon {
   color: #07843d;
   font-size: 20px;
 }
 .biografia-perfil {
-  margin: 20px 0;
+  margin: 12px 0 16px;
   color: var(--texto-principal);
   font-size: 0.98rem;
   line-height: 1.55;
@@ -494,29 +520,51 @@ onMounted(async () => {
     width: 100%;
     margin-top: 0;
     margin-inline: 0;
-    border-top: 0;
-    border-inline: 0;
-    border-radius: 0 0 20px 20px;
+    border-radius: 0 0 22px 22px;
   }
   .opciones-perfil {
     margin-right: 16px;
     margin-left: 16px;
   }
   .portada-perfil {
-    height: 180px;
+    height: 168px;
+    border-radius: 0 0 18px 18px;
   }
   .portada-perfil img {
     object-position: center top;
   }
   .contenido-perfil {
-    padding-top: 58px;
+    margin: -22px 12px 0;
+    padding: 16px 16px 18px;
+    border-radius: 21px;
+  }
+  .bloque-identidad {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
   }
   .avatar-superpuesto {
-    font-size: 96px !important;
-    top: -50px;
-    left: 18px;
+    width: 92px !important;
+    height: 92px !important;
+    margin-top: -48px;
+    font-size: 92px !important;
+    border-width: 4px;
+  }
+  .nombre-verificado {
+    gap: 5px;
+  }
+  .nombre-verificado h1 {
+    font-size: clamp(1.25rem, 5.8vw, 1.55rem);
+  }
+  .insignia-verificada {
+    font-size: 24px;
+  }
+  .identidad-perfil > p {
+    margin-top: 6px;
+    padding-block: 4px;
+    font-size: 0.78rem;
   }
   .biografia-perfil {
+    margin-top: 8px;
     font-size: 0.92rem;
   }
   .opciones-perfil .q-item {

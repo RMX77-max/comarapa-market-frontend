@@ -22,7 +22,7 @@
         <div class="publicacion-moderacion__datos">
           <div class="publicacion-moderacion__encabezado">
             <div><h2>{{ producto.titulo }}</h2><strong>{{ formatearPrecio(producto.precio) }}</strong></div>
-            <q-badge :color="colorEstado(producto.estado_moderacion)" :label="etiquetaEstado(producto.estado_moderacion)" />
+            <q-badge :color="producto.actualizacion_pendiente ? 'orange-8' : colorEstado(producto.estado_moderacion)" :label="producto.actualizacion_pendiente ? 'Actualización pendiente' : etiquetaEstado(producto.estado_moderacion)" />
           </div>
           <p>{{ producto.descripcion }}</p>
           <div class="publicacion-moderacion__meta">
@@ -33,9 +33,18 @@
           <q-banner v-if="producto.motivo_moderacion" dense class="motivo-actual">
             <b>Motivo actual:</b> {{ producto.motivo_moderacion }}
           </q-banner>
+          <q-banner v-if="producto.actualizacion_pendiente" class="cambios-pendientes">
+            <strong>Cambios que requieren revisión</strong>
+            <ul>
+              <li v-for="campo in producto.campos_actualizacion" :key="campo">
+                <b>{{ etiquetaCampo(campo) }}:</b> {{ resumenCambio(producto, campo) }}
+              </li>
+            </ul>
+            <small>La versión aprobada continúa visible hasta tomar una decisión.</small>
+          </q-banner>
           <div class="acciones-moderacion">
             <q-btn outline no-caps color="primary" icon="payments" label="Gestionar precios" @click="abrirPrecios(producto)" />
-            <q-btn v-if="producto.estado_moderacion !== 'aprobada'" unelevated no-caps color="primary" icon="check_circle" label="Aprobar" @click="confirmar(producto, 'aprobada')" />
+            <q-btn v-if="producto.estado_moderacion !== 'aprobada' || producto.actualizacion_pendiente" unelevated no-caps color="primary" icon="check_circle" :label="producto.actualizacion_pendiente ? 'Aprobar cambios' : 'Aprobar'" @click="confirmar(producto, 'aprobada')" />
             <q-btn outline no-caps color="blue-8" icon="edit_note" label="Pedir cambios" @click="abrirMotivo(producto, 'correccion')" />
             <q-btn outline no-caps color="negative" icon="cancel" label="Rechazar" @click="abrirMotivo(producto, 'rechazada')" />
             <q-btn v-if="producto.estado_moderacion === 'aprobada'" flat no-caps color="negative" icon="visibility_off" label="Ocultar" @click="abrirMotivo(producto, 'oculta')" />
@@ -92,6 +101,16 @@ const tituloDialogo = computed(() => ({ rechazada: 'Rechazar publicación', corr
 
 function etiquetaEstado(valor: EstadoModeracion): string { return opcionesEstado.find((item) => item.value === valor)?.label || valor; }
 function colorEstado(valor: EstadoModeracion): string { return ({ pendiente: 'orange-8', aprobada: 'positive', rechazada: 'negative', correccion: 'blue-8', oculta: 'grey-8' }[valor]); }
+function etiquetaCampo(campo: string): string { return ({ titulo: 'Título', precio: 'Precio publicado', precio_minimo: 'Precio mínimo', categoria_id: 'Categoría', descripcion: 'Descripción', imagen: 'Imagen', imagenes: 'Galería' }[campo] || campo); }
+function resumenCambio(producto: Producto, campo: string): string {
+  const valor = producto.valores_actualizacion?.[campo];
+  if (campo === 'imagenes' && Array.isArray(valor)) return `${valor.length} imagen(es) nueva(s)`;
+  if (campo === 'imagen') return 'Nueva imagen principal';
+  if (campo === 'categoria_id') return `Categoría #${typeof valor === 'number' || typeof valor === 'string' ? valor : ''}`;
+  if (campo === 'precio' || campo === 'precio_minimo') return formatearPrecio(Number(valor));
+  if (typeof valor === 'string' || typeof valor === 'number' || typeof valor === 'boolean') return String(valor);
+  return valor == null ? '' : JSON.stringify(valor);
+}
 async function cargar(): Promise<void> {
   cargando.value = true; error.value = '';
   try {
@@ -134,6 +153,9 @@ onBeforeUnmount(() => { if (temporizador) clearInterval(temporizador); });
 .publicacion-moderacion p { display: -webkit-box; margin: 10px 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .publicacion-moderacion__meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--texto-secundario); font-size: .8rem; }
 .motivo-actual { margin-top: 12px; border-radius: 10px; background: var(--coral-suave); }
+.cambios-pendientes { margin-top: 12px; border: 1px solid color-mix(in srgb, var(--coral-principal) 35%, transparent); border-radius: 12px; background: var(--coral-suave); }
+.cambios-pendientes ul { margin: 8px 0; padding-left: 18px; }
+.cambios-pendientes li { margin: 3px 0; overflow-wrap: anywhere; }
 .acciones-moderacion { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .paginacion { margin-top: 24px; justify-content: center; }
 .dialogo-moderacion { width: min(92vw, 540px); border-radius: 18px; }
