@@ -19,6 +19,7 @@ export const useTiendaProductos = defineStore('productos', {
     productoActual: null as Producto | null,
     paginacion: null as Paginacion | null,
     cargando: false,
+    cargandoMas: false,
     error: '',
   }),
   actions: {
@@ -37,6 +38,28 @@ export const useTiendaProductos = defineStore('productos', {
         this.error = obtenerMensajeError(error);
       } finally {
         this.cargando = false;
+      }
+    },
+    async cargarMasProductos(): Promise<boolean> {
+      if (
+        this.cargandoMas ||
+        !this.paginacion ||
+        this.paginacion.pagina_actual >= this.paginacion.ultima_pagina
+      ) {
+        return false;
+      }
+
+      this.cargandoMas = true;
+      try {
+        const datos = await listarProductos({ page: this.paginacion.pagina_actual + 1 });
+        const idsExistentes = new Set(this.productos.map((producto) => producto.id));
+        this.productos.push(
+          ...datos.productos.filter((producto) => !idsExistentes.has(producto.id)),
+        );
+        this.paginacion = datos.paginacion;
+        return datos.paginacion.pagina_actual < datos.paginacion.ultima_pagina;
+      } finally {
+        this.cargandoMas = false;
       }
     },
     async cargarProducto(id: number) {

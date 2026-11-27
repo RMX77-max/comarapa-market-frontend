@@ -46,7 +46,11 @@
       </div>
     </section>
 
-    <nav class="acciones-movil-fijas" aria-label="Servicios principales">
+    <nav
+      class="acciones-movil-fijas"
+      :class="{ 'acciones-movil-fijas--sin-prestamos': !prestamosHabilitados }"
+      aria-label="Servicios principales"
+    >
       <q-btn flat no-caps icon="holiday_village" label="Inmobiliaria" :to="{ name: 'inmuebles' }" />
       <q-btn
         v-if="prestamosHabilitados"
@@ -102,14 +106,26 @@
         etiqueta-accion="Reintentar"
         @accion="cargar"
       />
-      <div v-else class="cuadricula-productos">
-        <tarjeta-producto
-          v-for="producto in productos"
-          :key="producto.id"
-          :producto="producto"
-          @abrir="abrirProducto"
-        />
-      </div>
+      <q-infinite-scroll
+        v-else
+        :key="claveCargaProductos"
+        :offset="320"
+        @load="cargarMasProductos"
+      >
+        <div class="cuadricula-productos">
+          <tarjeta-producto
+            v-for="producto in productos"
+            :key="producto.id"
+            :producto="producto"
+            @abrir="abrirProducto"
+          />
+        </div>
+        <template #loading>
+          <div class="carga-mas-productos" aria-label="Cargando más productos">
+            <q-spinner-dots color="primary" size="34px" />
+          </div>
+        </template>
+      </q-infinite-scroll>
     </section>
 
     <section class="necesidades-inicio" aria-labelledby="titulo-necesidades">
@@ -151,6 +167,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
 import TarjetaProducto from 'components/TarjetaProducto.vue';
 import EstadoContenido from 'components/EstadoContenido.vue';
 import type { Producto } from 'src/models/Producto';
@@ -163,10 +180,12 @@ import {
 
 const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 const enrutador = useRouter();
+const q = useQuasar();
 const tienda = useTiendaProductos();
 const categorias = computed(() => tienda.categorias);
-const productos = computed(() => tienda.productos.slice(0, 8));
+const productos = computed(() => tienda.productos);
 const necesidades = ref<SolicitudProductoEspecial[]>([]);
+const claveCargaProductos = ref(0);
 function abrirCategoria(categoria: number): void {
   void enrutador.push({ name: 'buscar', query: { categoria } });
 }
@@ -182,6 +201,23 @@ async function cargar(): Promise<void> {
     listarNecesidadesProductos(),
   ]);
   necesidades.value = solicitudes;
+  claveCargaProductos.value += 1;
+}
+
+async function cargarMasProductos(
+  _indice: number,
+  finalizar: (detener?: boolean) => void,
+): Promise<void> {
+  try {
+    const hayMasPaginas = await tienda.cargarMasProductos();
+    finalizar(!hayMasPaginas);
+  } catch {
+    finalizar(true);
+    q.notify({
+      type: 'negative',
+      message: 'No pudimos cargar más productos. Inténtalo nuevamente más tarde.',
+    });
+  }
 }
 onMounted(() => void cargar());
 </script>
@@ -203,6 +239,12 @@ onMounted(() => void cargar());
 }
 .etiqueta-tipo--venta {
   color: var(--azul-marino);
+}
+
+.carga-mas-productos {
+  display: flex;
+  justify-content: center;
+  padding: 22px 0 10px;
 }
 .etiqueta-tipo--busqueda {
   color: var(--coral);
@@ -563,6 +605,14 @@ onMounted(() => void cargar());
       margin: 0;
       color: var(--coral);
       font-size: 21px;
+    }
+  }
+
+  .acciones-movil-fijas--sin-prestamos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    :deep(.q-btn:nth-child(2)) {
+      background: #d8ecd7;
     }
   }
 

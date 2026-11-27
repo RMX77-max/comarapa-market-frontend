@@ -44,7 +44,11 @@
           <span class="detalle-producto__categoria">{{ producto.categoria.nombre }}</span>
           <h1>{{ producto.titulo }}</h1>
           <div class="detalle-producto__precio">{{ formatearPrecio(producto.precio) }}</div>
-          <div v-if="producto.estado_producto" class="detalle-producto__estado">
+          <div
+            v-if="producto.estado_producto"
+            class="detalle-producto__estado"
+            :class="`detalle-producto__estado--${nivelEstadoProducto}`"
+          >
             <q-icon name="verified" />
             <div>
               <small>Estado del producto</small
@@ -150,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import EstadoContenido from 'components/EstadoContenido.vue';
@@ -191,6 +195,12 @@ const indiceImagen = ref(0),
   guardado = ref(false),
   relacionados = ref<Producto[]>([]);
 const puedeCompartir = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+const nivelEstadoProducto = computed(() => {
+  const estado = producto.value?.estado_producto ?? 0;
+  if (estado <= 3) return 'bajo';
+  if (estado <= 6) return 'medio';
+  return 'alto';
+});
 
 async function contactar(): Promise<void> {
   if (!producto.value || !mensajeConsulta.value.trim()) return;
@@ -264,9 +274,11 @@ function cambiarGuardado(): void {
 function abrirRelacionado(relacionado: Producto): void {
   void enrutador.push({ name: 'detalle-producto', params: { id: relacionado.id } });
 }
-async function cargarDetalle(): Promise<void> {
+async function cargarDetalle(idProducto: number): Promise<void> {
   indiceImagen.value = 0;
-  await tienda.cargarProducto(Number(ruta.params.id));
+  relacionados.value = [];
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  await tienda.cargarProducto(idProducto);
   if (!producto.value) return;
   guardado.value = autenticacion.usuario
     ? estaGuardado(autenticacion.usuario.id, producto.value.id)
@@ -280,8 +292,14 @@ async function cargarDetalle(): Promise<void> {
     relacionados.value = [];
   }
 }
-onMounted(cargarDetalle);
-watch(() => ruta.params.id, cargarDetalle);
+watch(
+  () => ({ id: Number(ruta.params.id), nombre: ruta.name }),
+  ({ id, nombre }) => {
+    if (nombre !== 'detalle-producto' || !Number.isInteger(id) || id <= 0) return;
+    void cargarDetalle(id);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
@@ -366,8 +384,131 @@ watch(() => ruta.params.id, cargarDetalle);
     color: var(--texto-secundario);
   }
 }
-:global(.body--dark) .detalle-producto__descripcion p {
-  color: #fff;
+:global(body.body--dark .detalle-producto) {
+  --detalle-fondo: #0d1b15;
+  --detalle-panel: #10251c;
+  --detalle-tarjeta: #153328;
+  --detalle-borde: #315b46;
+  --detalle-texto: #f5f7f5;
+  --detalle-texto-secundario: #b8c9bf;
+  --detalle-destacado: #a3e98c;
+  --detalle-reportar: #ff7070;
+
+  color: var(--detalle-texto);
+  background: var(--detalle-fondo);
+}
+:global(body.body--dark .detalle-producto__informacion) {
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid var(--detalle-borde);
+  border-radius: 22px;
+  background: var(--detalle-panel);
+}
+:global(body.body--dark .detalle-producto__informacion h1) {
+  color: var(--detalle-texto);
+  font-weight: 700;
+}
+:global(body.body--dark .detalle-producto__categoria) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--detalle-destacado);
+}
+:global(body.body--dark .detalle-producto__categoria::before) {
+  width: 3px;
+  height: 17px;
+  border-radius: 99px;
+  background: var(--detalle-destacado);
+  content: '';
+}
+:global(body.body--dark .detalle-producto__precio) {
+  color: var(--detalle-destacado);
+}
+:global(body.body--dark .detalle-producto__estado) {
+  --color-estado: var(--detalle-destacado);
+
+  border: 1px solid color-mix(in srgb, var(--color-estado) 72%, var(--detalle-borde));
+  background: var(--detalle-tarjeta);
+  color: var(--color-estado);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+}
+:global(body.body--dark .detalle-producto__estado--bajo) {
+  --color-estado: #ff8c8c;
+}
+:global(body.body--dark .detalle-producto__estado--medio) {
+  --color-estado: #ffd479;
+}
+:global(body.body--dark .detalle-producto__estado--alto) {
+  --color-estado: #a3e98c;
+}
+:global(body.body--dark .detalle-producto__estado .q-icon) {
+  align-self: stretch;
+  padding-right: 10px;
+  border-right: 1px solid color-mix(in srgb, var(--color-estado) 45%, transparent);
+}
+:global(body.body--dark .detalle-producto__estado small) {
+  color: var(--detalle-texto-secundario);
+}
+:global(body.body--dark .detalle-producto__estado strong) {
+  color: var(--color-estado);
+}
+:global(body.body--dark .detalle-producto__descripcion h2) {
+  color: var(--detalle-texto) !important;
+}
+:global(body.body--dark .detalle-producto__descripcion p) {
+  color: var(--detalle-texto-secundario) !important;
+  opacity: 1 !important;
+}
+:global(body.body--dark .detalle-producto__ubicacion) {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--detalle-texto-secundario);
+}
+:global(body.body--dark .detalle-producto__ubicacion .q-icon) {
+  color: var(--detalle-destacado);
+}
+:global(body.body--dark .consulta-rapida .q-field__control) {
+  color: var(--detalle-borde);
+  background: var(--detalle-tarjeta);
+}
+:global(body.body--dark .consulta-rapida .q-field__native),
+:global(body.body--dark .consulta-rapida .q-field__input) {
+  color: var(--detalle-texto) !important;
+}
+:global(body.body--dark .consulta-rapida .q-field--focused .q-field__control) {
+  color: var(--detalle-destacado);
+}
+:global(body.body--dark .consulta-rapida .q-btn) {
+  color: var(--detalle-panel) !important;
+  background: var(--detalle-destacado) !important;
+  font-weight: 800;
+}
+:global(body.body--dark .acciones-producto .q-btn.text-primary) {
+  color: var(--detalle-destacado) !important;
+  background: transparent;
+}
+:global(body.body--dark .acciones-producto .q-btn.text-primary::before) {
+  border-color: var(--detalle-borde);
+}
+:global(body.body--dark .acciones-producto .q-btn.text-negative) {
+  color: var(--detalle-reportar) !important;
+}
+:global(body.body--dark .perfil-vendedor) {
+  border-color: var(--detalle-borde);
+  background: var(--detalle-tarjeta);
+  color: var(--detalle-texto);
+}
+:global(body.body--dark .perfil-vendedor small),
+:global(body.body--dark .perfil-vendedor span) {
+  color: var(--detalle-texto-secundario);
+}
+:global(body.body--dark .perfil-vendedor .q-icon) {
+  color: var(--detalle-destacado);
+}
+:global(body.body--dark .aviso-propietario) {
+  border: 1px solid var(--detalle-borde);
+  background: var(--detalle-tarjeta);
+  color: var(--detalle-texto);
 }
 .boton-volver {
   height: 42px;
