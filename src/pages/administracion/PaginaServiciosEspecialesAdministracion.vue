@@ -20,7 +20,7 @@
         ><lista-admin :items="productos" tipo="producto" @revisar="revisarProducto" /></q-tab-panel
       ><q-tab-panel name="inmuebles"
         ><lista-admin :items="inmuebles" tipo="inmueble" @revisar="revisarPropiedad" /></q-tab-panel
-      ><q-tab-panel name="prestamos"
+      ><q-tab-panel v-if="prestamosHabilitados" name="prestamos"
         ><lista-admin
           :items="prestamos"
           tipo="prestamo"
@@ -42,6 +42,7 @@ import {
   type SolicitudProductoEspecial,
 } from 'src/services/servicioServiciosEspeciales';
 import { obtenerMensajeError } from 'src/services/servicioApi';
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 type RegistroAdmin = {
   id: number;
   ciudad: string;
@@ -102,7 +103,11 @@ type TabServicios = 'productos' | 'inmuebles' | 'prestamos';
 const route = useRoute(),
   router = useRouter(),
   q = useQuasar(),
-  tabs: TabServicios[] = ['productos', 'inmuebles', 'prestamos'],
+  tabs: TabServicios[] = [
+    'productos',
+    'inmuebles',
+    ...(prestamosHabilitados ? (['prestamos'] as const) : []),
+  ],
   tab = ref<TabServicios>(tabs.includes(String(route.query.tab) as TabServicios) ? String(route.query.tab) as TabServicios : 'productos'),
   cargando = ref(false),
   productos = ref<SolicitudProductoEspecial[]>([]),
@@ -111,7 +116,9 @@ const route = useRoute(),
 const opciones = computed(() => [
   { nombre: 'productos' as const, etiqueta: 'Productos solicitados', descripcion: 'Necesidades de compradores', icono: 'manage_search', total: productos.value.length },
   { nombre: 'inmuebles' as const, etiqueta: 'Inmuebles', descripcion: 'Propiedades por revisar', icono: 'apartment', total: inmuebles.value.length },
-  { nombre: 'prestamos' as const, etiqueta: 'Préstamos', descripcion: 'Evaluación privada', icono: 'request_quote', total: prestamos.value.length },
+  ...(prestamosHabilitados
+    ? [{ nombre: 'prestamos' as const, etiqueta: 'Préstamos', descripcion: 'Evaluación privada', icono: 'request_quote', total: prestamos.value.length }]
+    : []),
 ]);
 function seleccionarTab(nombre: TabServicios): void {
   tab.value = nombre;
@@ -120,10 +127,10 @@ function seleccionarTab(nombre: TabServicios): void {
 async function cargar() {
   cargando.value = true;
   try {
-    const d = await listarServiciosAdmin();
+    const d = await listarServiciosAdmin(prestamosHabilitados);
     productos.value = d.productos;
     inmuebles.value = d.inmuebles;
-    prestamos.value = d.prestamos;
+    prestamos.value = prestamosHabilitados ? d.prestamos : [];
   } catch (e) {
     q.notify({ type: 'negative', message: obtenerMensajeError(e) });
   } finally {

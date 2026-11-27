@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/iniciar-sesion',
@@ -140,11 +142,15 @@ const routes: RouteRecordRaw[] = [
         name: 'solicitar-producto',
         component: () => import('pages/PaginaSolicitarProducto.vue'),
       },
-      {
-        path: 'solicitar-prestamo',
-        name: 'solicitar-prestamo',
-        component: () => import('pages/PaginaPrestamosRedisenada.vue'),
-      },
+      ...(prestamosHabilitados
+        ? [
+            {
+              path: 'solicitar-prestamo',
+              name: 'solicitar-prestamo',
+              component: () => import('pages/PaginaPrestamosRedisenada.vue'),
+            },
+          ]
+        : []),
       {
         path: 'inmuebles',
         name: 'inmuebles',

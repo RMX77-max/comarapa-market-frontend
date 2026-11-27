@@ -183,6 +183,7 @@ import { listarServiciosAdmin } from 'src/services/servicioServiciosEspeciales';
 import { obtenerMensajeError } from 'src/services/servicioApi';
 import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 const autenticacion = useTiendaAutenticacion();
 const resumen = ref<ResumenAdministrativo | null>(null);
 const pendientesEspeciales = ref({ productos: 0, inmuebles: 0, prestamos: 0 });
@@ -193,7 +194,7 @@ const totalPendientes = computed(
     (resumen.value?.publicaciones.pendientes_revision ?? 0) +
     pendientesEspeciales.value.productos +
     pendientesEspeciales.value.inmuebles +
-    pendientesEspeciales.value.prestamos,
+    (prestamosHabilitados ? pendientesEspeciales.value.prestamos : 0),
 );
 const porcentajeDisponibles = computed(() =>
   resumen.value?.publicaciones.total
@@ -267,14 +268,18 @@ const prioridades = computed(() => [
     clase: 'verde',
     ruta: { name: 'administracion-servicios', query: { tab: 'inmuebles' } },
   },
-  {
-    etiqueta: 'Préstamos pendientes',
-    descripcion: 'Solicitudes privadas por evaluar',
-    valor: pendientesEspeciales.value.prestamos,
-    icono: 'request_quote',
-    clase: 'amarillo',
-    ruta: { name: 'administracion-servicios', query: { tab: 'prestamos' } },
-  },
+  ...(prestamosHabilitados
+    ? [
+        {
+          etiqueta: 'Préstamos pendientes',
+          descripcion: 'Solicitudes privadas por evaluar',
+          valor: pendientesEspeciales.value.prestamos,
+          icono: 'request_quote',
+          clase: 'amarillo',
+          ruta: { name: 'administracion-servicios', query: { tab: 'prestamos' } },
+        },
+      ]
+    : []),
 ]);
 const accesos = [
   {
@@ -303,7 +308,7 @@ const accesos = [
   },
   {
     etiqueta: 'Servicios especiales',
-    descripcion: 'Solicitudes, inmuebles y préstamos',
+    descripcion: prestamosHabilitados ? 'Solicitudes, inmuebles y préstamos' : 'Solicitudes e inmuebles',
     icono: 'business_center',
     ruta: { name: 'administracion-servicios' },
   },
@@ -313,7 +318,7 @@ async function cargarResumen(): Promise<void> {
   error.value = '';
   const [resultadoResumen, resultadoServicios] = await Promise.allSettled([
     obtenerResumenAdministrativo(),
-    listarServiciosAdmin(),
+    listarServiciosAdmin(prestamosHabilitados),
   ]);
   if (resultadoResumen.status === 'fulfilled') resumen.value = resultadoResumen.value;
   else error.value = obtenerMensajeError(resultadoResumen.reason);
@@ -322,7 +327,9 @@ async function cargarResumen(): Promise<void> {
     pendientesEspeciales.value = {
       productos: resultadoServicios.value.productos.filter((x) => pendientes.has(x.estado)).length,
       inmuebles: resultadoServicios.value.inmuebles.filter((x) => pendientes.has(x.estado)).length,
-      prestamos: resultadoServicios.value.prestamos.filter((x) => pendientes.has(x.estado)).length,
+      prestamos: prestamosHabilitados
+        ? resultadoServicios.value.prestamos.filter((x) => pendientes.has(x.estado)).length
+        : 0,
     };
   }
   cargando.value = false;

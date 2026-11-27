@@ -83,7 +83,7 @@ export async function listarInmuebles(): Promise<Inmueble[]> {
   return (await servicioApi.get<RespuestaApi<{ inmuebles: Inmueble[] }>>('/inmuebles')).data.datos
     .inmuebles;
 }
-export async function listarServiciosAdmin(): Promise<{
+export async function listarServiciosAdmin(incluirPrestamos = true): Promise<{
   productos: SolicitudProductoEspecial[];
   inmuebles: Inmueble[];
   prestamos: SolicitudPrestamo[];
@@ -95,7 +95,9 @@ export async function listarServiciosAdmin(): Promise<{
         inmuebles: Inmueble[];
         prestamos: SolicitudPrestamo[];
       }>
-    >('/administracion/servicios-especiales')
+    >('/administracion/servicios-especiales', {
+      params: { incluir_prestamos: incluirPrestamos ? 1 : 0 },
+    })
   ).data.datos;
 }
 export async function revisarSolicitudProducto(id: number, datos: object): Promise<void> {

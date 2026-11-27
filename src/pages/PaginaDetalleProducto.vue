@@ -51,7 +51,10 @@
               ><strong>{{ formatearEstadoProducto(producto.estado_producto) }}</strong>
             </div>
           </div>
-          <p>{{ producto.descripcion }}</p>
+          <section class="detalle-producto__descripcion">
+            <h2>Descripción</h2>
+            <p>{{ producto.descripcion }}</p>
+          </section>
           <div class="detalle-producto__ubicacion">
             <q-icon name="place" /> {{ producto.ubicacion }}
           </div>
@@ -308,9 +311,22 @@ watch(() => ruta.params.id, cargarDetalle);
     font-weight: 600;
     line-height: 1.2;
   }
-  &__informacion > p {
-    color: var(--texto-secundario);
+  &__descripcion {
+    margin-top: 20px;
+  }
+  &__descripcion h2 {
+    margin: 0 0 6px;
+    color: var(--texto-principal);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  &__descripcion p {
+    margin: 0;
+    color: #000;
+    font-size: 1rem;
     line-height: 1.65;
+    opacity: 1;
   }
   &__categoria,
   &__precio {
@@ -349,6 +365,9 @@ watch(() => ruta.params.id, cargarDetalle);
     margin: 16px 0;
     color: var(--texto-secundario);
   }
+}
+:global(.body--dark) .detalle-producto__descripcion p {
+  color: #fff;
 }
 .boton-volver {
   height: 42px;

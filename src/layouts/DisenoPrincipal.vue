@@ -18,6 +18,7 @@ import BarraNavegacion from 'components/BarraNavegacion.vue';
 import BotonVolverPerfil from 'components/BotonVolverPerfil.vue';
 import EncabezadoPrincipal from 'components/EncabezadoPrincipal.vue';
 
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 const ruta = useRoute();
 const rutasDePerfil = new Set([
   'mis-publicaciones',
@@ -27,7 +28,7 @@ const rutasDePerfil = new Set([
   'soporte',
   'solicitar-producto',
   'inmuebles',
-  'solicitar-prestamo',
+  ...(prestamosHabilitados ? ['solicitar-prestamo'] : []),
 ]);
 const mostrarVolverPerfil = computed(
   () => typeof ruta.name === 'string' && rutasDePerfil.has(ruta.name),

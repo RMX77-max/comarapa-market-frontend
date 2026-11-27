@@ -128,7 +128,7 @@
             ><q-item-label caption>Publica o consulta propiedades</q-item-label></q-item-section
           ><q-item-section side><q-icon name="chevron_right" /></q-item-section
         ></q-item>
-        <q-item clickable :to="{ name: 'solicitar-prestamo' }"
+        <q-item v-if="prestamosHabilitados" clickable :to="{ name: 'solicitar-prestamo' }"
           ><q-item-section avatar><q-icon name="request_quote" color="primary" /></q-item-section
           ><q-item-section
             ><q-item-label>Solicitar préstamo</q-item-label
@@ -163,8 +163,20 @@
             />
           </q-card-section>
           <q-card-section v-else class="contenido-codigo">
-            <p>Introduce el código que recibiste por WhatsApp.</p>
+            <template v-if="solicitud.estado === 'pendiente'">
+              <q-icon name="schedule_send" class="icono-estado-verificacion" />
+              <p>
+                Tu solicitud está pendiente. Cuando administración envíe el código por WhatsApp,
+                podrás introducirlo aquí sin crear otra solicitud.
+              </p>
+            </template>
+            <template v-else-if="solicitud.estado === 'codigo_expirado'">
+              <q-icon name="timer_off" class="icono-estado-verificacion" />
+              <p>El código anterior venció. Administración puede enviarte uno nuevo.</p>
+            </template>
+            <p v-else>Introduce el código que recibiste por WhatsApp.</p>
             <q-input
+              v-if="solicitud.estado === 'codigo_enviado'"
               v-model.trim="codigo"
               outlined
               inputmode="numeric"
@@ -184,7 +196,7 @@
               @click="solicitarCodigo"
             />
             <q-btn
-              v-else
+              v-else-if="solicitud.estado === 'codigo_enviado'"
               color="primary"
               unelevated
               no-caps
@@ -192,6 +204,15 @@
               :disable="codigo.length !== 6"
               :loading="procesando"
               @click="confirmarCodigo"
+            />
+            <q-btn
+              v-else
+              outline
+              color="primary"
+              no-caps
+              label="Actualizar estado"
+              :loading="procesando"
+              @click="cargarSolicitudActiva"
             />
             <q-btn flat no-caps label="Volver" v-close-popup />
           </q-card-actions>
@@ -208,6 +229,7 @@ import AvatarUsuario from 'components/AvatarUsuario.vue';
 import {
   cerrarSesion as solicitarCierre,
   confirmarVerificacionTelefono,
+  obtenerSolicitudVerificacionTelefono,
   solicitarVerificacionTelefono,
   type SolicitudVerificacionTelefono,
 } from 'src/services/servicioAutenticacion';
@@ -216,6 +238,7 @@ import { obtenerMensajeError } from 'src/services/servicioApi';
 import { obtenerPerfil } from 'src/services/servicioPerfil';
 import { useTiendaAutenticacion } from 'src/stores/tiendaAutenticacion';
 
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 const enrutador = useRouter();
 const autenticacion = useTiendaAutenticacion();
 const usuario = computed(() => autenticacion.usuario);
@@ -230,11 +253,21 @@ const telefonoVisible = computed(
     usuario.value?.telefono?.replace(/^(\+591)(\d{2})\d{3}(\d{3})$/, '$1 $2•••$3') ??
     'Celular registrado',
 );
-function abrirVerificacion(): void {
-  solicitud.value = null;
+async function abrirVerificacion(): Promise<void> {
   codigo.value = '';
   telefonoNuevo.value = '';
   dialogoTelefono.value = true;
+  await cargarSolicitudActiva();
+}
+async function cargarSolicitudActiva(): Promise<void> {
+  procesando.value = true;
+  try {
+    solicitud.value = await obtenerSolicitudVerificacionTelefono();
+  } catch (e) {
+    q.notify({ type: 'negative', message: obtenerMensajeError(e) });
+  } finally {
+    procesando.value = false;
+  }
 }
 async function solicitarCodigo(): Promise<void> {
   if (!usuario.value?.telefono && !/^\d{8}$/.test(telefonoNuevo.value)) {
@@ -435,6 +468,11 @@ onMounted(async () => {
 .contenido-codigo {
   display: grid;
   gap: 12px;
+}
+.icono-estado-verificacion {
+  justify-self: center;
+  color: var(--primary);
+  font-size: 2.25rem;
 }
 .dialogo-telefono .q-card__actions {
   gap: 4px;

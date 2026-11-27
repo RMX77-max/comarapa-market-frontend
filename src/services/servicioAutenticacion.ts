@@ -34,6 +34,16 @@ export async function iniciarSesion(
 export interface SolicitudVerificacionTelefono {
   solicitud_id: number;
   telefono: string;
+  estado: 'pendiente' | 'codigo_enviado' | 'codigo_expirado';
+  codigo_enviado_en: string | null;
+  expira_en: string;
+}
+export async function obtenerSolicitudVerificacionTelefono(): Promise<SolicitudVerificacionTelefono | null> {
+  return (
+    await servicioApi.get<RespuestaApi<{ solicitud: SolicitudVerificacionTelefono | null }>>(
+      '/telefono/verificacion',
+    )
+  ).data.datos.solicitud;
 }
 export async function solicitarVerificacionTelefono(
   telefono?: string,

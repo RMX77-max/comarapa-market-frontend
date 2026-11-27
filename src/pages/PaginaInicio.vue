@@ -6,7 +6,11 @@
         <p class="presentacion-inicio__mensaje">
           Compra y vende productos cerca de ti,<br />de forma fácil, segura y rápida.
         </p>
-        <div class="acciones-hero" aria-label="Servicios principales">
+        <div
+          class="acciones-hero"
+          :class="{ 'acciones-hero--sin-prestamos': !prestamosHabilitados }"
+          aria-label="Servicios principales"
+        >
           <button
             class="accion-hero accion-hero--inmuebles"
             type="button"
@@ -17,6 +21,7 @@
             <q-icon name="arrow_forward" />
           </button>
           <button
+            v-if="prestamosHabilitados"
             class="accion-hero accion-hero--prestamos"
             type="button"
             @click="enrutador.push({ name: 'solicitar-prestamo' })"
@@ -44,6 +49,7 @@
     <nav class="acciones-movil-fijas" aria-label="Servicios principales">
       <q-btn flat no-caps icon="holiday_village" label="Inmobiliaria" :to="{ name: 'inmuebles' }" />
       <q-btn
+        v-if="prestamosHabilitados"
         flat
         no-caps
         icon="request_quote"
@@ -155,6 +161,7 @@ import {
   type SolicitudProductoEspecial,
 } from 'src/services/servicioServiciosEspeciales';
 
+const prestamosHabilitados = process.env.PRESTAMOS_HABILITADOS === 'true';
 const enrutador = useRouter();
 const tienda = useTiendaProductos();
 const categorias = computed(() => tienda.categorias);
@@ -246,6 +253,10 @@ onMounted(() => void cargar());
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.acciones-hero--sin-prestamos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .accion-hero {
